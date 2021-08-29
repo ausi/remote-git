@@ -1,0 +1,57 @@
+{
+    "name": "ausi/remote-git",
+    "type": "library",
+    "description": "Edit git repositories remotely",
+    "keywords": ["git", "remote", "commit"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Martin Auswöger",
+            "email": "martin@auswoeger.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "symfony/filesystem": "^5.3",
+        "symfony/process": "^5.3"
+    },
+    "require-dev": {
+        "contao/easy-coding-standard": "^3.3",
+        "phpstan/phpstan": "^0.12.96",
+        "phpstan/phpstan-phpunit": "^0.12.22",
+        "phpunit/phpunit": "^9.5.8",
+        "psalm/plugin-phpunit": "^0.16",
+        "slam/phpstan-extensions": "^5.1",
+        "vimeo/psalm": "^4.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ausi\\RemoteGit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ausi\\RemoteGit\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "all": [
+            "@unit-tests",
+            "@cs-fixer",
+            "@phpstan",
+            "@psalm"
+        ],
+        "cs-fixer": [
+            "vendor/bin/ecs check src tests --fix --ansi"
+        ],
+        "phpstan": [
+            "vendor/bin/phpstan analyze src tests --level=8 --memory-limit=1G --ansi"
+        ],
+        "psalm": [
+            "vendor/bin/psalm --no-suggestions"
+        ],
+        "unit-tests": [
+            "vendor/bin/phpunit --colors=always"
+        ]
+    }
+}
