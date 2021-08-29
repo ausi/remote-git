@@ -56,7 +56,7 @@ class RepositoryTest extends TestCase
 		}
 
 		$repository = new Repository(
-			'https://github.com/symfony/symfony.git',
+			'https://github.com/ausi/remote-git.git',
 			$this->tmpDir,
 			new GitExecutable(null, $debugOutput)
 		);
@@ -64,32 +64,32 @@ class RepositoryTest extends TestCase
 		$this->assertInstanceOf(
 			File::class,
 			$file = $repository
-				->getBranch('6.0')
+				->getBranch('test')
 				->getCommit()
 				->getTree()
-				->getFile('src/Symfony/Component/Intl/Resources/data/locales/en.php')
+				->getFile('file-created-via-remote-git.txt')
 		);
 
 		/** @var File $file */
 		$this->assertNotEmpty($file->getContents());
 
 		$tree = $repository
-			->getBranch('6.0')
+			->getBranch('test')
 			->getCommit()
 			->getTree()
-			->withFile('file-created-via-remote-git.txt', "👍\n")
+			->withFile('file-created-via-remote-git.txt', $file->getContents().date('Y-m-d H:i:s').": 👍\n")
 		;
 
 		$this->assertSame(40, \strlen($tree->getHash()));
 
 		$commit = $repository
 			->setAuthor('My Name', 'me@example.com')
-			->commitTree($tree, 'Test-Commit', $repository->getBranch('6.0')->getCommit())
+			->commitTree($tree, 'Test-Commit', $repository->getBranch('test')->getCommit())
 		;
 
 		$this->assertSame(40, \strlen($commit->getHash()));
 
-		//$commit->push('6.0');
+		//$commit->push('test');
 
 		$debugOutput?->writeln("\n<fg=yellow>End of GitExecutable debug output</>\n");
 
