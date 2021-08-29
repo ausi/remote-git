@@ -19,6 +19,7 @@ use Ausi\RemoteGit\Repository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class RepositoryTest extends TestCase
 {
@@ -46,7 +47,10 @@ class RepositoryTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function testConnection(): void
+	/**
+	 * @dataProvider connectionUrlsProvider
+	 */
+	public function testConnection(string $repoUrl): void
 	{
 		$debugOutput = null;
 
@@ -56,7 +60,7 @@ class RepositoryTest extends TestCase
 		}
 
 		$repository = new Repository(
-			'https://github.com/ausi/remote-git.git',
+			$repoUrl,
 			$this->tmpDir,
 			new GitExecutable(null, $debugOutput)
 		);
@@ -64,32 +68,37 @@ class RepositoryTest extends TestCase
 		$this->assertInstanceOf(
 			File::class,
 			$file = $repository
-				->getBranch('test')
+				->getBranch('HEAD')
 				->getCommit()
 				->getTree()
-				->getFile('file-created-via-remote-git.txt')
+				->getFile('.gitignore')
 		);
 
 		/** @var File $file */
 		$this->assertNotEmpty($file->getContents());
 
 		$tree = $repository
-			->getBranch('test')
+			->getBranch('HEAD')
 			->getCommit()
 			->getTree()
-			->withFile('file-created-via-remote-git.txt', $file->getContents().date('Y-m-d H:i:s').": 👍\n")
+			->withFile('.gitignore', $file->getContents().date("# Y-m-d H:i:s: 👍\n"))
 		;
 
 		$this->assertSame(40, \strlen($tree->getHash()));
 
 		$commit = $repository
 			->setAuthor('My Name', 'me@example.com')
-			->commitTree($tree, 'Test-Commit', $repository->getBranch('test')->getCommit())
+			->commitTree($tree, 'Test-Commit', $repository->getBranch('HEAD')->getCommit())
 		;
 
 		$this->assertSame(40, \strlen($commit->getHash()));
 
-		//$commit->push('test');
+		try {
+			$commit->push('HEAD');
+			$this->fail('Pushing should have failed without write access');
+		} catch (ProcessFailedException) {
+			$debugOutput?->writeln('<fg=green>Failed as expected because of missing write access</>');
+		}
 
 		$debugOutput?->writeln("\n<fg=yellow>End of GitExecutable debug output</>\n");
 
@@ -99,6 +108,19 @@ class RepositoryTest extends TestCase
 		gc_collect_cycles();
 
 		$this->assertSame(0, $this->getTmpDirSize());
+	}
+
+	/**
+	 * @return \Generator<array>
+	 */
+	public function connectionUrlsProvider(): \Generator
+	{
+		yield ['https://github.com/torvalds/linux.git'];
+		yield ['ssh://git@github.com/torvalds/linux.git'];
+		yield ['git@github.com:torvalds/linux.git'];
+		yield ['https://gitlab.com/linux-kernel/stable.git'];
+		yield ['git@gitlab.com:linux-kernel/stable.git'];
+		yield ['file://'.\dirname(__DIR__, 2).'/.git'];
 	}
 
 	private function getTmpDirSize(): int

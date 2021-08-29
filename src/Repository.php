@@ -24,6 +24,7 @@ class Repository
 {
 	private GitExecutable $executable;
 	private string $gitDir;
+	private ?string $headBranchName = null;
 
 	/**
 	 * @var array<Branch>
@@ -83,11 +84,31 @@ class Repository
 	{
 		$this->listBranches();
 
+		if ($name === 'HEAD') {
+			$name = $this->getHeadBranchName();
+		}
+
 		if (!isset($this->branches['refs/remotes/origin/'.$name])) {
 			throw new \RuntimeException('Unable to find branch');
 		}
 
 		return $this->branches['refs/remotes/origin/'.$name];
+	}
+
+	public function getHeadBranchName(): string
+	{
+		if ($this->headBranchName !== null) {
+			return $this->headBranchName;
+		}
+
+		$this->run('remote set-head origin -a');
+		$ref = trim($this->run('symbolic-ref refs/remotes/origin/HEAD'));
+
+		if (strncmp($ref, 'refs/remotes/origin/', 20) !== 0) {
+			throw new \RuntimeException('Unable to get HEAD branch');
+		}
+
+		return substr($ref, 20);
 	}
 
 	public function getCommit(string $commitHash): Commit
@@ -148,6 +169,10 @@ class Repository
 
 	public function pushCommit(Commit $commit, string $branchName, bool $force = false): self
 	{
+		if ($branchName === 'HEAD') {
+			$branchName = $this->getHeadBranchName();
+		}
+
 		$this->run(
 			'push origin --progress',
 			'--'.($force ? '' : 'no-').'force-with-lease',
