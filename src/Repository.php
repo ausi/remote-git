@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Ausi\RemoteGit;
 
 use Ausi\RemoteGit\Exception\BranchNotFoundException;
+use Ausi\RemoteGit\Exception\ConnectionException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
@@ -22,6 +23,7 @@ use Ausi\RemoteGit\GitObject\GitObject;
 use Ausi\RemoteGit\GitObject\GitObjectInterface;
 use Ausi\RemoteGit\GitObject\Tree;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class Repository
 {
@@ -205,20 +207,33 @@ class Repository
 		return $this;
 	}
 
+	/**
+	 * @throws ConnectionException
+	 */
 	private function initialize(string $url): void
 	{
-		$this->executable->execute(['init', '--bare', $this->gitDir]);
-		$this->run('remote add origin', $url);
-		$this->run('config remote.origin.promisor true');
-		$this->run('config remote.origin.partialclonefilter tree:0');
-		$this->run('fetch origin --progress --no-tags --depth 1');
+		try {
+			$this->executable->execute(['init', '--bare', $this->gitDir]);
+			$this->run('remote add origin', $url);
+			$this->run('config remote.origin.promisor true');
+			$this->run('config remote.origin.partialclonefilter tree:0');
+			$this->run('fetch origin --progress --no-tags --depth 1');
+		} catch (ProcessFailedException $e) {
+			throw new ConnectionException(sprintf('Could not connect to git repository "%s".', $url), 0, $e);
+		}
 	}
 
+	/**
+	 * @throws ProcessFailedException
+	 */
 	private function run(string $command, string ...$args): string
 	{
 		return $this->runInput('', $command, ...$args);
 	}
 
+	/**
+	 * @throws ProcessFailedException
+	 */
 	private function runInput(string $input, string $command, string ...$args): string
 	{
 		return $this->executable->execute([...explode(' ', $command), ...array_values($args)], $this->gitDir, $input);

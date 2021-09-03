@@ -16,6 +16,7 @@ namespace Ausi\RemoteGit;
 use Ausi\RemoteGit\Exception\ExecutableNotFoundException;
 use Ausi\RemoteGit\Exception\InvalidGitVersionException;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -58,6 +59,8 @@ class GitExecutable
 
 	/**
 	 * @param array<int,string> $arguments
+	 *
+	 * @throws ProcessFailedException
 	 */
 	public function execute(array $arguments, string $gitDir = '', string $stdin = ''): string
 	{
