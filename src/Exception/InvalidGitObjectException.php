@@ -21,10 +21,10 @@ class InvalidGitObjectException extends \RuntimeException implements ExceptionIn
 	{
 		return new self(
 			sprintf(
-			'$type must be a class string of type "%s", "%s" given',
-			GitObject::class,
-			$type
-		)
+				'$type must be a class string of type "%s", "%s" given',
+				GitObject::class,
+				$type
+			)
 		);
 	}
 }

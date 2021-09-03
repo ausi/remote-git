@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit;
 
+use Ausi\RemoteGit\Exception\BranchNotFoundException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
@@ -96,7 +97,7 @@ class Repository
 		}
 
 		if (!isset($this->branches['refs/remotes/origin/'.$name])) {
-			throw new RuntimeException('Unable to find branch');
+			throw new BranchNotFoundException();
 		}
 
 		return $this->branches['refs/remotes/origin/'.$name];
