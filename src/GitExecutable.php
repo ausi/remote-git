@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit;
 
+use Ausi\RemoteGit\Exception\ExecutableNotFoundException;
+use Ausi\RemoteGit\Exception\InvalidGitVersionException;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Exception\RuntimeException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -32,7 +33,7 @@ class GitExecutable
 			$path = (new ExecutableFinder)->find('git', '/usr/bin/git');
 
 			if ($path === null) {
-				throw new \InvalidArgumentException('Unable to find executable git path');
+				throw new ExecutableNotFoundException();
 			}
 		}
 
@@ -47,11 +48,11 @@ class GitExecutable
 			|| ($version[1] ?? null) !== 'version'
 			|| !preg_match('/^\d+\.\d+\.\d+/', $version[2] ?? '', $versionMatch)
 		) {
-			throw new RuntimeException($output);
+			throw new InvalidGitVersionException($output);
 		}
 
 		if (version_compare($versionMatch[0], '2.30.0') < 0) {
-			throw new RuntimeException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2]));
+			throw new InvalidGitVersionException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2]));
 		}
 	}
 

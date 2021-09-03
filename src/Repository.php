@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit;
 
+use Ausi\RemoteGit\Exception\InvalidGitObjectException;
+use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\GitObject\GitObject;
@@ -54,6 +56,8 @@ class Repository
 	}
 
 	/**
+	 * @throws RuntimeException
+	 *
 	 * @return array<Branch>
 	 */
 	public function listBranches(): array
@@ -74,12 +78,15 @@ class Repository
 		}
 
 		if (!$this->branches) {
-			throw new \RuntimeException('Unable to list branches');
+			throw new RuntimeException('Unable to list branches');
 		}
 
 		return array_values($this->branches);
 	}
 
+	/**
+	 * @throws RuntimeException
+	 */
 	public function getBranch(string $name): Branch
 	{
 		$this->listBranches();
@@ -89,12 +96,15 @@ class Repository
 		}
 
 		if (!isset($this->branches['refs/remotes/origin/'.$name])) {
-			throw new \RuntimeException('Unable to find branch');
+			throw new RuntimeException('Unable to find branch');
 		}
 
 		return $this->branches['refs/remotes/origin/'.$name];
 	}
 
+	/**
+	 * @throws RuntimeException
+	 */
 	public function getHeadBranchName(): string
 	{
 		if ($this->headBranchName !== null) {
@@ -105,7 +115,7 @@ class Repository
 		$ref = trim($this->run('symbolic-ref refs/remotes/origin/HEAD'));
 
 		if (strncmp($ref, 'refs/remotes/origin/', 20) !== 0) {
-			throw new \RuntimeException('Unable to get HEAD branch');
+			throw new RuntimeException('Unable to get HEAD branch');
 		}
 
 		return substr($ref, 20);
@@ -141,12 +151,14 @@ class Repository
 	 *
 	 * @param class-string<T> $type
 	 *
+	 * @throws InvalidGitObjectException
+	 *
 	 * @return T
 	 */
 	public function createObject(string $contents, string $type = File::class): GitObjectInterface
 	{
 		if (!is_a($type, GitObjectInterface::class, true)) {
-			throw new \InvalidArgumentException(sprintf('$type must be a class string of type "%s", "%s" given', GitObject::class, $type));
+			throw InvalidGitObjectException::createForInvalidType($type);
 		}
 
 		$hash = trim($this->runInput($contents, 'hash-object -w --stdin -t', $type::getTypeName()));
@@ -157,11 +169,13 @@ class Repository
 
 	/**
 	 * @param class-string<GitObject> $type
+	 *
+	 * @throws InvalidGitObjectException
 	 */
 	public function readObject(string $hash, string $type = File::class): string
 	{
 		if (!is_a($type, GitObject::class, true)) {
-			throw new \InvalidArgumentException(sprintf('$type must be a class string of type "%s", "%s" given', GitObject::class, $type));
+			throw InvalidGitObjectException::createForInvalidType($type);
 		}
 
 		return $this->run('cat-file', $type::getTypeName(), $hash);
