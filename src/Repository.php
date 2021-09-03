@@ -201,8 +201,8 @@ class Repository
 	{
 		$this->executable->execute(['init', '--bare', $this->gitDir]);
 		$this->run('remote add origin', $url);
-		$this->run('config remote.origin.promisor true');
-		$this->run('config remote.origin.partialclonefilter tree:0');
+		$this->setConfig('remote.origin.promisor', 'true');
+		$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
 		$this->run('fetch origin --progress --no-tags --depth 1');
 	}
 
