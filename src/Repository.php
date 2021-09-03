@@ -192,7 +192,7 @@ class Repository
 
 	public function setConfig(string $key, string $value): static
 	{
-		$this->run('config '.$key, $value);
+		$this->run('config', $key, $value);
 
 		return $this;
 	}
