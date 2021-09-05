@@ -82,6 +82,7 @@ class RepositoryTest extends TestCase
 			->getCommit()
 			->getTree()
 			->withFile('.gitignore', $file->getContents().date("# Y-m-d H:i:s: 👍\n"))
+			->withFile('non/existent/directory/file.txt', "🎉\n")
 		;
 
 		$this->assertSame(40, \strlen($tree->getHash()));
@@ -91,7 +92,10 @@ class RepositoryTest extends TestCase
 			->commitTree($tree, 'Test-Commit', $repository->getBranch('HEAD')->getCommit())
 		;
 
-		$this->assertSame(40, \strlen($commit->getHash()));
+		$this->assertInstanceOf(File::class, $file = $commit->getTree()->getFile('non/existent/directory/file.txt'));
+
+		/** @var File $file */
+		$this->assertSame("🎉\n", $file->getContents());
 
 		try {
 			$commit->push('HEAD');
