@@ -16,7 +16,6 @@ namespace Ausi\RemoteGit\GitObject;
 use Ausi\RemoteGit\Exception\InvalidArgumentException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
 use Ausi\RemoteGit\Exception\InvalidPathException;
-use Ausi\RemoteGit\Exception\RuntimeException;
 
 final class Tree extends GitObject
 {
