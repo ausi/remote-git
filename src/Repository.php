@@ -13,6 +13,12 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit;
 
+use Ausi\RemoteGit\Exception\BranchNotFoundException;
+use Ausi\RemoteGit\Exception\ConnectionException;
+use Ausi\RemoteGit\Exception\InitializeException;
+use Ausi\RemoteGit\Exception\InvalidGitObjectException;
+use Ausi\RemoteGit\Exception\ProcessFailedException;
+use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\GitObject\GitObject;
@@ -54,6 +60,8 @@ class Repository
 	}
 
 	/**
+	 * @throws RuntimeException
+	 *
 	 * @return array<Branch>
 	 */
 	public function listBranches(): array
@@ -74,12 +82,15 @@ class Repository
 		}
 
 		if (!$this->branches) {
-			throw new \RuntimeException('Unable to list branches');
+			throw new RuntimeException('Unable to list branches');
 		}
 
 		return array_values($this->branches);
 	}
 
+	/**
+	 * @throws BranchNotFoundException
+	 */
 	public function getBranch(string $name): Branch
 	{
 		$this->listBranches();
@@ -88,13 +99,14 @@ class Repository
 			$name = $this->getHeadBranchName();
 		}
 
-		if (!isset($this->branches['refs/remotes/origin/'.$name])) {
-			throw new \RuntimeException('Unable to find branch');
-		}
+		$key = 'refs/remotes/origin/'.$name;
 
-		return $this->branches['refs/remotes/origin/'.$name];
+		return $this->branches[$key] ?? throw new BranchNotFoundException();
 	}
 
+	/**
+	 * @throws RuntimeException
+	 */
 	public function getHeadBranchName(): string
 	{
 		if ($this->headBranchName !== null) {
@@ -105,7 +117,7 @@ class Repository
 		$ref = trim($this->run('symbolic-ref refs/remotes/origin/HEAD'));
 
 		if (strncmp($ref, 'refs/remotes/origin/', 20) !== 0) {
-			throw new \RuntimeException('Unable to get HEAD branch');
+			throw new RuntimeException('Unable to get HEAD branch');
 		}
 
 		return substr($ref, 20);
@@ -141,12 +153,14 @@ class Repository
 	 *
 	 * @param class-string<T> $type
 	 *
+	 * @throws InvalidGitObjectException
+	 *
 	 * @return T
 	 */
 	public function createObject(string $contents, string $type = File::class): GitObjectInterface
 	{
 		if (!is_a($type, GitObjectInterface::class, true)) {
-			throw new \InvalidArgumentException(sprintf('$type must be a class string of type "%s", "%s" given', GitObject::class, $type));
+			throw InvalidGitObjectException::createForInvalidType($type);
 		}
 
 		$hash = trim($this->runInput($contents, 'hash-object -w --stdin -t', $type::getTypeName()));
@@ -157,11 +171,13 @@ class Repository
 
 	/**
 	 * @param class-string<GitObject> $type
+	 *
+	 * @throws InvalidGitObjectException
 	 */
 	public function readObject(string $hash, string $type = File::class): string
 	{
 		if (!is_a($type, GitObject::class, true)) {
-			throw new \InvalidArgumentException(sprintf('$type must be a class string of type "%s", "%s" given', GitObject::class, $type));
+			throw InvalidGitObjectException::createForInvalidType($type);
 		}
 
 		return $this->run('cat-file', $type::getTypeName(), $hash);
@@ -197,13 +213,26 @@ class Repository
 		return $this;
 	}
 
+	/**
+	 * @throws ConnectionException
+	 * @throws InitializeException
+	 */
 	private function initialize(string $url): void
 	{
-		$this->executable->execute(['init', '--bare', $this->gitDir]);
-		$this->run('remote add origin', $url);
-		$this->setConfig('remote.origin.promisor', 'true');
-		$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
-		$this->run('fetch origin --progress --no-tags --depth 1');
+		try {
+			$this->executable->execute(['init', '--bare', $this->gitDir]);
+			$this->run('remote add origin', $url);
+			$this->setConfig('remote.origin.promisor', 'true');
+			$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
+		} catch (ProcessFailedException $e) {
+			throw new InitializeException(sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
+		}
+
+		try {
+			$this->run('fetch origin --progress --no-tags --depth 1');
+		} catch (ProcessFailedException $e) {
+			throw new ConnectionException(sprintf('Could not connect to git repository "%s".', $url), 0, $e);
+		}
 	}
 
 	private function run(string $command, string ...$args): string

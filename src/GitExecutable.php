@@ -13,8 +13,11 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit;
 
+use Ausi\RemoteGit\Exception\ExecutableNotFoundException;
+use Ausi\RemoteGit\Exception\InvalidGitVersionException;
+use Ausi\RemoteGit\Exception\ProcessFailedException;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Process\Exception\RuntimeException;
+use Symfony\Component\Process\Exception\ProcessFailedException as SymfonyProcessFailedException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -32,7 +35,7 @@ class GitExecutable
 			$path = (new ExecutableFinder)->find('git', '/usr/bin/git');
 
 			if ($path === null) {
-				throw new \InvalidArgumentException('Unable to find executable git path');
+				throw new ExecutableNotFoundException();
 			}
 		}
 
@@ -47,16 +50,18 @@ class GitExecutable
 			|| ($version[1] ?? null) !== 'version'
 			|| !preg_match('/^\d+\.\d+\.\d+/', $version[2] ?? '', $versionMatch)
 		) {
-			throw new RuntimeException($output);
+			throw new InvalidGitVersionException($output);
 		}
 
 		if (version_compare($versionMatch[0], '2.30.0') < 0) {
-			throw new RuntimeException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2]));
+			throw new InvalidGitVersionException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2]));
 		}
 	}
 
 	/**
 	 * @param array<int,string> $arguments
+	 *
+	 * @throws ProcessFailedException
 	 */
 	public function execute(array $arguments, string $gitDir = '', string $stdin = ''): string
 	{
@@ -72,9 +77,13 @@ class GitExecutable
 			$process->setInput($stdin);
 		}
 
-		$output = $process->mustRun(
-			fn (string $type, string $data) => $this->debugOutput?->write($type === 'err' ? $data : '', false, OutputInterface::OUTPUT_RAW)
-		)->getOutput();
+		try {
+			$output = $process->mustRun(
+				fn (string $type, string $data) => $this->debugOutput?->write($type === 'err' ? $data : '', false, OutputInterface::OUTPUT_RAW)
+			)->getOutput();
+		} catch (SymfonyProcessFailedException $exception) {
+			throw new ProcessFailedException($exception);
+		}
 
 		if ($this->debugOutput && ($duration = microtime(true) - $process->getStartTime()) > 0.05) {
 			$this->debugOutput->writeln('<fg=yellow>duration '.number_format($duration, 3).'s</>'."\n");
