@@ -215,6 +215,7 @@ class Repository
 
 	/**
 	 * @throws ConnectionException
+	 * @throws InitializeException
 	 */
 	private function initialize(string $url): void
 	{
