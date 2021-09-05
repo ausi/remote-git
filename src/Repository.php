@@ -200,8 +200,15 @@ class Repository
 
 	public function setAuthor(string $name, string $email): static
 	{
-		$this->run('config user.name', $name);
-		$this->run('config user.email', $email);
+		$this->setConfig('user.name', $name);
+		$this->setConfig('user.email', $email);
+
+		return $this;
+	}
+
+	public function setConfig(string $key, string $value): static
+	{
+		$this->run('config', $key, $value);
 
 		return $this;
 	}
@@ -214,8 +221,8 @@ class Repository
 		try {
 			$this->executable->execute(['init', '--bare', $this->gitDir]);
 			$this->run('remote add origin', $url);
-			$this->run('config remote.origin.promisor true');
-			$this->run('config remote.origin.partialclonefilter tree:0');
+			$this->setConfig('remote.origin.promisor', 'true');
+			$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
 		} catch (ProcessFailedException $e) {
 			throw new InitializeException(sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
 		}

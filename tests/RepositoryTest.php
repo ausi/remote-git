@@ -36,4 +36,28 @@ class RepositoryTest extends TestCase
 
 		new Repository('ssh://user@example.com/repo.git', null, $executable);
 	}
+
+	public function testSetConfig(): void
+	{
+		$config = [];
+
+		$executable = $this->createMock(GitExecutable::class);
+		$executable
+			->expects($this->atLeastOnce())
+			->method('execute')
+			->willReturnCallback(function(array $arguments, string $gitDir = '', string $stdin = '') use (&$config): string {
+				if ($arguments[0] === 'config') {
+					$config[$arguments[1]] = $arguments[2];
+				}
+
+				return '';
+			})
+		;
+
+		$repo = new Repository('ssh://user@example.com/repo.git', null, $executable);
+
+		$this->assertArrayNotHasKey('core.sshCommand', $config);
+		$this->assertSame($repo, $repo->setConfig('core.sshCommand', 'ssh -i /path/to/identity_file'));
+		$this->assertSame('ssh -i /path/to/identity_file', $config['core.sshCommand']);
+	}
 }
