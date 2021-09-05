@@ -15,6 +15,7 @@ namespace Ausi\RemoteGit\GitObject;
 
 final class Tree extends GitObject
 {
+	private const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
 	private ?string $treeContent = null;
 
 	public static function getTypeName(): string
@@ -27,18 +28,18 @@ final class Tree extends GitObject
 		return $this->getRepo()->commitTree($this, $message, ...$parents);
 	}
 
-	public function getFile(string $path): File|Tree
+	public function getFile(string $path): File|Tree|null
 	{
 		$pathSegments = explode('/', trim($path, '/'), 2);
 
 		if (\count($pathSegments) > 1) {
 			$tree = $this->getFile($pathSegments[0]);
 
-			if (!$tree instanceof self) {
+			if ($tree instanceof File) {
 				throw new \InvalidArgumentException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
 			}
 
-			return $tree->getFile($pathSegments[1]);
+			return $tree?->getFile($pathSegments[1]);
 		}
 
 		$treeContent = $this->loadTreeContent();
@@ -66,7 +67,7 @@ final class Tree extends GitObject
 			}
 		}
 
-		throw new \InvalidArgumentException(sprintf('"%s" file or directory not found', $pathSegments[0]));
+		return null;
 	}
 
 	public function withFile(string $path, string|File|Tree $file, bool $executable = false): self
@@ -79,11 +80,17 @@ final class Tree extends GitObject
 			throw new \InvalidArgumentException(sprintf('Only files can be marked as executable, expected "%s" got "%s"', File::class, $file::class));
 		}
 
-		$pathSegments = explode('/', trim($path, '/'), 2);
+		$pathSegments = explode('/', trim($path, '/'));
 
 		if (\count($pathSegments) > 1) {
-			throw new \RuntimeException('nested paths not yet implementend');
-			// $file = …
+			$subtree = $this->getFile($pathSegments[0]) ?? new self($this->getRepo(), self::EMPTY_TREE_HASH);
+
+			if ($subtree instanceof File) {
+				throw new \InvalidArgumentException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
+			}
+
+			$path = array_shift($pathSegments);
+			$file = $subtree->withFile(implode('/', $pathSegments), $file, $executable);
 		}
 
 		$treeByPath = [];
