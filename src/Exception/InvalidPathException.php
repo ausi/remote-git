@@ -13,6 +13,6 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\Exception;
 
-class ExecutableNotFoundException extends InvalidArgumentException
+class InvalidPathException extends InvalidArgumentException
 {
 }

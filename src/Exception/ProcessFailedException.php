@@ -13,18 +13,12 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\Exception;
 
-use Ausi\RemoteGit\GitObject\GitObject;
+use Symfony\Component\Process\Exception\ProcessFailedException as SymfonyProcessFailedException;
 
-class InvalidGitObjectException extends RuntimeException
+class ProcessFailedException extends SymfonyProcessFailedException implements ExceptionInterface
 {
-	public static function createForInvalidType(string $type): self
+	public function __construct(SymfonyProcessFailedException $exception)
 	{
-		return new self(
-			sprintf(
-				'$type must be a class string of type "%s", "%s" given',
-				GitObject::class,
-				$type
-			)
-		);
+		parent::__construct($exception->getProcess());
 	}
 }

@@ -15,7 +15,9 @@ namespace Ausi\RemoteGit;
 
 use Ausi\RemoteGit\Exception\BranchNotFoundException;
 use Ausi\RemoteGit\Exception\ConnectionException;
+use Ausi\RemoteGit\Exception\InitializeException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
+use Ausi\RemoteGit\Exception\ProcessFailedException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
 use Ausi\RemoteGit\GitObject\File;
@@ -23,7 +25,6 @@ use Ausi\RemoteGit\GitObject\GitObject;
 use Ausi\RemoteGit\GitObject\GitObjectInterface;
 use Ausi\RemoteGit\GitObject\Tree;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class Repository
 {
@@ -88,7 +89,7 @@ class Repository
 	}
 
 	/**
-	 * @throws RuntimeException
+	 * @throws BranchNotFoundException
 	 */
 	public function getBranch(string $name): Branch
 	{
@@ -98,11 +99,9 @@ class Repository
 			$name = $this->getHeadBranchName();
 		}
 
-		if (!isset($this->branches['refs/remotes/origin/'.$name])) {
-			throw new BranchNotFoundException();
-		}
+		$key = 'refs/remotes/origin/'.$name;
 
-		return $this->branches['refs/remotes/origin/'.$name];
+		return $this->branches[$key] ?? throw new BranchNotFoundException();
 	}
 
 	/**
@@ -217,23 +216,22 @@ class Repository
 			$this->run('remote add origin', $url);
 			$this->run('config remote.origin.promisor true');
 			$this->run('config remote.origin.partialclonefilter tree:0');
+		} catch (ProcessFailedException $e) {
+			throw new InitializeException(sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
+		}
+
+		try {
 			$this->run('fetch origin --progress --no-tags --depth 1');
 		} catch (ProcessFailedException $e) {
 			throw new ConnectionException(sprintf('Could not connect to git repository "%s".', $url), 0, $e);
 		}
 	}
 
-	/**
-	 * @throws ProcessFailedException
-	 */
 	private function run(string $command, string ...$args): string
 	{
 		return $this->runInput('', $command, ...$args);
 	}
 
-	/**
-	 * @throws ProcessFailedException
-	 */
 	private function runInput(string $input, string $command, string ...$args): string
 	{
 		return $this->executable->execute([...explode(' ', $command), ...array_values($args)], $this->gitDir, $input);

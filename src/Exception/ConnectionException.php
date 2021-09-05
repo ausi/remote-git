@@ -13,6 +13,6 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\Exception;
 
-class ConnectionException extends \InvalidArgumentException implements ExceptionInterface
+class ConnectionException extends InvalidArgumentException
 {
 }

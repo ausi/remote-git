@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\GitObject;
 
+use Ausi\RemoteGit\Exception\InvalidArgumentException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
+use Ausi\RemoteGit\Exception\InvalidPathException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 
 final class Tree extends GitObject
@@ -32,6 +34,7 @@ final class Tree extends GitObject
 
 	/**
 	 * @throws InvalidGitObjectException
+	 * @throws InvalidPathException
 	 */
 	public function getFile(string $path): File|Tree
 	{
@@ -41,7 +44,7 @@ final class Tree extends GitObject
 			$tree = $this->getFile($pathSegments[0]);
 
 			if (!$tree instanceof self) {
-				throw new InvalidGitObjectException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
+				throw new InvalidPathException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
 			}
 
 			return $tree->getFile($pathSegments[1]);
@@ -58,7 +61,7 @@ final class Tree extends GitObject
 			$nextNull = strpos($treeContent, "\0", $offset);
 
 			if ($nextSpace === false || $nextNull === false || $nextSpace > $nextNull || $nextNull + 20 >= $length) {
-				throw new InvalidGitObjectException('Invalid tree object.');
+				throw new InvalidGitObjectException(sprintf('Invalid tree object %s.', $this->getHash()));
 			}
 
 			if ($pathSegments[0] === substr($treeContent, $nextSpace + 1, $nextNull - $nextSpace - 1)) {
@@ -72,11 +75,13 @@ final class Tree extends GitObject
 			}
 		}
 
-		throw new InvalidGitObjectException(sprintf('"%s" file or directory not found', $pathSegments[0]));
+		throw new InvalidPathException(sprintf('"%s" file or directory not found', $pathSegments[0]));
 	}
 
 	/**
+	 * @throws InvalidArgumentException
 	 * @throws InvalidGitObjectException
+	 * @throws RuntimeException
 	 */
 	public function withFile(string $path, string|File|Tree $file, bool $executable = false): self
 	{
@@ -85,7 +90,7 @@ final class Tree extends GitObject
 		}
 
 		if ($executable && !$file instanceof File) {
-			throw new InvalidGitObjectException(sprintf('Only files can be marked as executable, expected "%s" got "%s"', File::class, $file::class));
+			throw new InvalidArgumentException(sprintf('Only files can be marked as executable, expected "%s" got "%s"', File::class, $file::class));
 		}
 
 		$pathSegments = explode('/', trim($path, '/'), 2);
@@ -108,7 +113,7 @@ final class Tree extends GitObject
 			$nextNull = strpos($treeContent, "\0", $offset);
 
 			if ($nextSpace === false || $nextNull === false || $nextSpace > $nextNull || $nextNull + 20 >= $length) {
-				throw new InvalidGitObjectException('Invalid tree object.');
+				throw new InvalidGitObjectException(sprintf('Invalid tree object %s.', $this->getHash()));
 			}
 
 			$treeByPath['/'.substr($treeContent, $nextSpace + 1, $nextNull - $nextSpace - 1)] = [

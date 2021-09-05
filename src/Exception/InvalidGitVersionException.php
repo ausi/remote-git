@@ -13,6 +13,6 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\Exception;
 
-class InvalidGitVersionException extends \RuntimeException implements ExceptionInterface
+class InvalidGitVersionException extends RuntimeException
 {
 }
