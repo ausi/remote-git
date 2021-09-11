@@ -120,7 +120,7 @@ class Repository
 			throw new RuntimeException('Unable to get HEAD branch');
 		}
 
-		return substr($ref, 20);
+		return $this->headBranchName = substr($ref, 20);
 	}
 
 	public function getCommit(string $commitHash): Commit
