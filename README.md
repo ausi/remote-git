@@ -51,4 +51,24 @@ or download the source files from GitHub.
 composer require ausi/remote-git
 ```
 
+Speed
+-----
+
+Speed comparison
+of cloning <https://gitlab.com/linux-kernel/stable.git>
+and reading the contents of a file:
+
+| Command                  | Network | Disk Space |  Time |
+|:-------------------------|--------:|-----------:|------:|
+| `git clone`              | 3.21 GB |     4.6 GB | 901 s |
+| `git clone --depth 1`    |  207 MB |     1.4 GB |  77 s |
+| `git clone -n --depth 1` |  207 MB |     216 MB |  46 s |
+| `getBranch(…)->getCommit()->getTree()->getFile(…)->getContents()` | 2.49 MB | 2.57 MB | 5.8 s |
+
+Naturally, this is strongly dependent on many factors
+like bandwidth and CPU power
+and should only give a rough idea of this projects purpose,
+namely reading or writing small bits of data from or to
+a remote GIT repository.
+
 [Composer]: https://getcomposer.org/
