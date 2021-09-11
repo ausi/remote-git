@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the ausi/slug-generator package.
+ * This file is part of the ausi/remote-git package.
  *
  * (c) Martin Auswöger <martin@auswoeger.com>
  *
@@ -25,13 +25,15 @@ class RepositoryTest extends TestCase
 		$executable
 			->expects($this->atLeastOnce())
 			->method('execute')
-			->willReturnCallback(function(array $arguments, string $gitDir = '', string $stdin = ''): string {
-				if ($arguments[0] === 'init' && $arguments[1] === '--bare') {
-					$this->assertStringStartsWith(rtrim(sys_get_temp_dir(), '/').'/', $arguments[2]);
-				}
+			->willReturnCallback(
+				function (array $arguments): string {
+					if ($arguments[0] === 'init' && $arguments[1] === '--bare') {
+						$this->assertStringStartsWith(rtrim(sys_get_temp_dir(), '/').'/', $arguments[2]);
+					}
 
-				return '';
-			})
+					return '';
+				}
+			)
 		;
 
 		new Repository('ssh://user@example.com/repo.git', null, $executable);
@@ -45,13 +47,15 @@ class RepositoryTest extends TestCase
 		$executable
 			->expects($this->atLeastOnce())
 			->method('execute')
-			->willReturnCallback(function(array $arguments, string $gitDir = '', string $stdin = '') use (&$config): string {
-				if ($arguments[0] === 'config') {
-					$config[$arguments[1]] = $arguments[2];
-				}
+			->willReturnCallback(
+				static function (array $arguments, string $gitDir = '', string $stdin = '') use (&$config): string {
+					if ($arguments[0] === 'config') {
+						$config[$arguments[1]] = $arguments[2];
+					}
 
-				return '';
-			})
+					return '';
+				}
+			)
 		;
 
 		$repo = new Repository('ssh://user@example.com/repo.git', null, $executable);
