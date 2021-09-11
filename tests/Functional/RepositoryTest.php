@@ -124,7 +124,6 @@ class RepositoryTest extends TestCase
 		yield ['git@github.com:torvalds/linux.git'];
 		yield ['https://gitlab.com/linux-kernel/stable.git'];
 		yield ['git@gitlab.com:linux-kernel/stable.git'];
-		yield ['file://'.\dirname(__DIR__, 2).'/.git'];
 	}
 
 	private function getTmpDirSize(): int

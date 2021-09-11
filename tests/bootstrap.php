@@ -15,9 +15,7 @@ use Composer\Autoload\ClassLoader;
 
 error_reporting(E_ALL);
 
-$include = /** @return ClassLoader|false */ function (string $file) {
-	return file_exists($file) ? include $file : false;
-};
+$include = /** @return ClassLoader|false */ fn (string $file) => file_exists($file) ? include $file : false;
 
 if (
 	($loader = $include(__DIR__.'/../vendor/autoload.php')) === false
