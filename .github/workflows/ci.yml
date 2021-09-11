@@ -29,8 +29,18 @@ jobs:
       - name: Install the dependencies
         run: composer install --no-interaction --no-suggest
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo $SSH_KEY > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+
       - name: Generate the coverage report
-        run: phpdbg -qrr vendor/bin/phpunit --testsuite=unit --coverage-clover=clover.xml  --colors=always
+        env:
+          GIT_SSH_COMMAND: 'ssh -i ~/.ssh/id_rsa'
+        run: phpdbg -qrr vendor/bin/phpunit --testsuite=unit,functional --coverage-clover=clover.xml  --colors=always
 
       - name: Upload the coverage report
         uses: codecov/codecov-action@v1
@@ -92,33 +102,7 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo '-----BEGIN OPENSSH PRIVATE KEY-----
-          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
-          -----END OPENSSH PRIVATE KEY-----' > ~/.ssh/id_rsa
+          echo $SSH_KEY > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
           ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
@@ -150,6 +134,19 @@ jobs:
       - name: Run the unit tests
         run: vendor/bin/phpunit --testsuite=unit --colors=always
 
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo $SSH_KEY > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+          ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
+
+      - name: Run the functional tests
+        env:
+          GIT_SSH_COMMAND: 'ssh -i ~/.ssh/id_rsa'
+        run: vendor/bin/phpunit --testsuite=functional --colors=always
+
   windows:
     name: Windows
     runs-on: windows-latest
@@ -175,3 +172,33 @@ jobs:
 
       - name: Run the unit tests
         run: vendor/bin/phpunit.bat --testsuite=unit --colors=always
+
+env:
+  SSH_KEY: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABFwAAAAdzc2gtcn
+    NhAAAAAwEAAQAAAQEAxIy5lk/P3MznzYEMbRbvGFWZzRUbnABGkJ7tXL1SVKFSMbfccizS
+    PzC5erAPGYak11ika1pgeMlduQHYHOwHUs+P+Wm+SuC/37xjT2WPI0VRUoS4Otqx+0Kz2u
+    mV06QT3gCZ0fsY4N+L5l6y7qvkLjMEZjkT8rQ3mqhnTlP5JIP9CK7CJniIb4gUs6GVBoH2
+    rIHLzYZeQDJKQ+Z25oGp2zsJ1ciqLxrZCDwKkya8M+5mt6XuIcbgGu0/HZN6GBEUtvwqrX
+    hg4F17/kr9AzXlrNX3PlNaS3WVL/7TgCYteMVQ2YjBheqW6t7zmv2KEGt/Xal4sF35+vti
+    jCuBWWiWtwAAA9BGNLaSRjS2kgAAAAdzc2gtcnNhAAABAQDEjLmWT8/czOfNgQxtFu8YVZ
+    nNFRucAEaQnu1cvVJUoVIxt9xyLNI/MLl6sA8ZhqTXWKRrWmB4yV25Adgc7AdSz4/5ab5K
+    4L/fvGNPZY8jRVFShLg62rH7QrPa6ZXTpBPeAJnR+xjg34vmXrLuq+QuMwRmORPytDeaqG
+    dOU/kkg/0IrsImeIhviBSzoZUGgfasgcvNhl5AMkpD5nbmganbOwnVyKovGtkIPAqTJrwz
+    7ma3pe4hxuAa7T8dk3oYERS2/CqteGDgXXv+Sv0DNeWs1fc+U1pLdZUv/tOAJi14xVDZiM
+    GF6pbq3vOa/YoQa39dqXiwXfn6+2KMK4FZaJa3AAAAAwEAAQAAAQEAqRZXYlRvAgjVMhne
+    0sp0Dn81vRR3mBE0o53VnX7RoTTXPSZrY13j0bDdIAruMot+rDP53tD1RXQWSN6pSNhUxI
+    0D0xGBP3FyH8w1s0wvg6xSdabvxtH1Y67Sg3WIC3aQEOB7dAWMNYibFihJzsHZn1UMZ9Sa
+    sKURYN+XX+8l2p6dNUMZ13RsexAjWZEjdrvFlKPJOJcsOeSr+furQ9AttYnXlVPa+nrPfT
+    aOOjaaqSjLtdQAQShr0QuXiyi8s3jmZCTxLPOZqDBwwIA4Z2sssNqoNDO2h8z+O4vi94Cf
+    uGIM91DmlaOXPs1GTsa2g2rXJ41nkhLRsJfugWTLU9lpYQAAAIEAsC6I/UamrGiuG6kxx7
+    HiWlr3aMqCNHXqJgZ7A1sd7beIIIAlxtXomBh2z0C6x2KR2Zsd+aEeXsjATpOpKq76INan
+    XO+3NF3nQ7QuYN0UI5M7MA2/+aNSLQ0vE0wAjFwOEl8HTkLlMu2YK1Fihx0b1TCI/Hc8ww
+    LbdnYKyM3yXEYAAACBAPvzSaE4qalLTcZTYNjjLqX+4guTWOfGCK3vNxq1lggOLFzFC7Dw
+    JTg/YXjku1PvcxLXjmW8bwnrmTZXxpQDhmppPGhEjGeixDvcOtqay3xaFz5QFOHxD+vXHx
+    udzS/rsbpr0Lp1F0xxrv2ZELYELL1MmhkJfuyC8+3V3fLOEOWLAAAAgQDHtXpGGI1gyZzF
+    qMqjStUQ/60E6n8+pBPTS+oE7DuFlj66lP/0lfMYM+TjTMriKCs+0CotGyV3u763yricpf
+    9jENXNevjEK7xDc9geA6JQo+qB3gHU1q9frYBamsDGOT+pa5qBRPpkBGHUf15fzGE4ALq9
+    koS7UptpVh4hnv2xBQAAABZtYXJ0aW5AYXVzaW1icC0yLmxvY2FsAQID
+    -----END OPENSSH PRIVATE KEY-----
