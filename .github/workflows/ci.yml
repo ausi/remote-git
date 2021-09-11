@@ -30,7 +30,7 @@ jobs:
         run: composer install --no-interaction --no-suggest
 
       - name: Generate the coverage report
-        run: phpdbg -qrr vendor/bin/phpunit --coverage-clover=clover.xml  --colors=always
+        run: phpdbg -qrr vendor/bin/phpunit --testsuite=unit --coverage-clover=clover.xml  --colors=always
 
       - name: Upload the coverage report
         uses: codecov/codecov-action@v1
@@ -88,6 +88,9 @@ jobs:
           composer remove --dev --no-update contao/* phpstan/* psalm/* slam/* vimeo/*
           composer install --no-interaction --no-suggest
 
+      - name: Run the unit tests
+        run: vendor/bin/phpunit --testsuite=unit --colors=always
+
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -122,10 +125,10 @@ jobs:
           ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
           ssh-keyscan -t rsa gitlab.com >> ~/.ssh/known_hosts
 
-      - name: Run the unit tests
+      - name: Run the functional tests
         env:
           GIT_SSH_COMMAND: 'ssh -i ~/.ssh/id_rsa'
-        run: vendor/bin/phpunit --colors=always
+        run: vendor/bin/phpunit --testsuite=functional --colors=always
 
   prefer-lowest:
     name: Prefer Lowest
@@ -147,7 +150,7 @@ jobs:
           composer update --prefer-lowest --prefer-stable --no-interaction --no-suggest
 
       - name: Run the unit tests
-        run: vendor/bin/phpunit --colors=always
+        run: vendor/bin/phpunit --testsuite=unit --colors=always
 
   windows:
     name: Windows
@@ -173,4 +176,4 @@ jobs:
           composer install --no-interaction --no-suggest --no-progress
 
       - name: Run the unit tests
-        run: vendor/bin/phpunit.bat --colors=always
+        run: vendor/bin/phpunit.bat --testsuite=unit --colors=always
