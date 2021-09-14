@@ -198,6 +198,48 @@ class Repository
 		return $this;
 	}
 
+	/**
+	 * @param string|null $privateKey Identity key to use for the SSH connection or null to use the default of the system
+	 * @param string|bool $knownHosts Known hosts to verify against, false disables the host key checking
+	 */
+	public function setSshConfig(string $privateKey = null, string|bool $knownHosts = true, string $sshCommand = 'ssh'): static
+	{
+		$keyPath = $this->gitDir.'/.ssh_identity';
+		$hostsPath = $this->gitDir.'/.ssh_known_hosts';
+
+		if (\is_string($privateKey)) {
+			file_put_contents($keyPath, $privateKey);
+			chmod($keyPath, 0600);
+			$privateKey = $keyPath;
+		}
+
+		if (\is_string($knownHosts)) {
+			file_put_contents($hostsPath, $knownHosts);
+			$knownHosts = $hostsPath;
+		}
+
+		return $this->setSshConfigPaths($privateKey, $knownHosts, $sshCommand);
+	}
+
+	/**
+	 * @param string|null $privateKeyPath Identity file to use for the SSH connection or null to use the default of the system
+	 * @param string|bool $knownHostsPath Known hosts file to verify against, false disables the host key checking
+	 */
+	public function setSshConfigPaths(string $privateKeyPath = null, string|bool $knownHostsPath = true, string $sshCommand = 'ssh'): static
+	{
+		if ($privateKeyPath !== null) {
+			$sshCommand .= ' -i '.escapeshellarg($privateKeyPath);
+		}
+
+		if ($knownHostsPath === false) {
+			$sshCommand .= ' -o StrictHostKeyChecking=no';
+		} elseif (\is_string($knownHostsPath)) {
+			$sshCommand .= ' -o '.escapeshellarg('UserKnownHostsFile='.$knownHostsPath);
+		}
+
+		return $this->setConfig('core.sshCommand', $sshCommand);
+	}
+
 	public function setAuthor(string $name, string $email): static
 	{
 		$this->setConfig('user.name', $name);
