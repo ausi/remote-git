@@ -252,9 +252,9 @@ class Repository
 			$sshCommand .= ' -i '.escapeshellarg($privateKeyPath);
 		}
 
-		if ($knownHostsPath === false) {
-			$sshCommand .= ' -o StrictHostKeyChecking=no';
-		} elseif (\is_string($knownHostsPath)) {
+		$sshCommand .= ' -o StrictHostKeyChecking='.($knownHostsPath === false ? 'no' : 'yes');
+
+		if (\is_string($knownHostsPath)) {
 			$sshCommand .= ' -o '.escapeshellarg('UserKnownHostsFile='.$knownHostsPath);
 		}
 
