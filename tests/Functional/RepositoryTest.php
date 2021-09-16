@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Ausi\RemoteGit\Tests\Functional;
 
+use Ausi\RemoteGit\Exception\ConnectionException;
 use Ausi\RemoteGit\GitExecutable;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\Repository;
@@ -48,9 +49,9 @@ class RepositoryTest extends TestCase
 	}
 
 	/**
-	 * @dataProvider connectionUrlsProvider
+	 * @dataProvider repoUrlsProvider
 	 */
-	public function testConnection(string $repoUrl): void
+	public function testFullCycle(string $repoUrl): void
 	{
 		$debugOutput = null;
 
@@ -117,13 +118,57 @@ class RepositoryTest extends TestCase
 	/**
 	 * @return \Generator<array>
 	 */
-	public function connectionUrlsProvider(): \Generator
+	public function repoUrlsProvider(): \Generator
 	{
 		yield ['https://github.com/torvalds/linux.git'];
 		yield ['ssh://git@github.com/torvalds/linux.git'];
 		yield ['git@github.com:torvalds/linux.git'];
 		yield ['https://gitlab.com/linux-kernel/stable.git'];
 		yield ['git@gitlab.com:linux-kernel/stable.git'];
+	}
+
+	public function testSshConfig(): void
+	{
+		$debugOutput = null;
+
+		if (\in_array('--debug', $_SERVER['argv'], true)) {
+			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
+			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
+		}
+
+		$repoUrl = iterator_to_array($this->repoUrlsProvider())[1][0];
+		$executable = new GitExecutable(null, $debugOutput);
+
+		$repository = new Repository($repoUrl, $this->tmpDir, $executable);
+
+		$repository->setSshConfig('malformed private key');
+
+		try {
+			$repository->connect();
+			$this->fail();
+		} catch (ConnectionException $exception) {
+			$this->assertStringContainsString('invalid format', (string) $exception);
+		}
+
+		$repository->setSshConfig(null, 'malformed known hosts');
+
+		try {
+			$repository->connect();
+			$this->fail();
+		} catch (ConnectionException $exception) {
+			$this->assertStringContainsString('Host key verification failed', (string) $exception);
+		}
+
+		$repository->setSshConfig(null, false, 'php -r "fwrite(STDERR, \'error from command\');exit(1);" --');
+
+		try {
+			$repository->connect();
+			$this->fail();
+		} catch (ConnectionException $exception) {
+			$this->assertStringContainsString('error from command', (string) $exception);
+		}
+
+		$this->assertGreaterThan(0, \count($repository->setSshConfig()->connect()->listBranches()));
 	}
 
 	private function getTmpDirSize(): int
