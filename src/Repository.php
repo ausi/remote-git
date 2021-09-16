@@ -30,6 +30,7 @@ class Repository
 {
 	private GitExecutable $executable;
 	private string $gitDir;
+	private bool $connected = false;
 	private ?string $headBranchName = null;
 
 	/**
@@ -60,6 +61,26 @@ class Repository
 	}
 
 	/**
+	 * @throws ConnectionException
+	 */
+	public function connect(): static
+	{
+		if ($this->connected) {
+			return $this;
+		}
+
+		try {
+			$this->run('fetch origin --progress --no-tags --depth 1');
+		} catch (ProcessFailedException $e) {
+			throw new ConnectionException('Could not connect to git repository.', 0, $e);
+		}
+
+		$this->connected = true;
+
+		return $this;
+	}
+
+	/**
 	 * @throws RuntimeException
 	 *
 	 * @return array<Branch>
@@ -70,7 +91,7 @@ class Repository
 			return $this->branches;
 		}
 
-		$lines = explode("\n", trim($this->run('show-ref')));
+		$lines = explode("\n", trim($this->connect()->run('show-ref')));
 
 		foreach ($lines as $line) {
 			$cols = explode(' ', $line);
@@ -256,7 +277,6 @@ class Repository
 	}
 
 	/**
-	 * @throws ConnectionException
 	 * @throws InitializeException
 	 */
 	private function initialize(string $url): void
@@ -268,12 +288,6 @@ class Repository
 			$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
 		} catch (ProcessFailedException $e) {
 			throw new InitializeException(sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
-		}
-
-		try {
-			$this->run('fetch origin --progress --no-tags --depth 1');
-		} catch (ProcessFailedException $e) {
-			throw new ConnectionException(sprintf('Could not connect to git repository "%s".', $url), 0, $e);
 		}
 	}
 

@@ -20,8 +20,10 @@ use Ausi\RemoteGit\Repository;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\Exception\ConnectionException;
 
+$repo = new Repository('ssh://git@github.com/ausi/remote-git.git');
+
 try {
-    $repo = new Repository('ssh://git@github.com/ausi/remote-git.git');
+    $repo->connect();
 } catch(ConnectionException $exception) {
     // Unable to connect to the specified server
 }
