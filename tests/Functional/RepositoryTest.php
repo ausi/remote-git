@@ -66,6 +66,11 @@ class RepositoryTest extends TestCase
 			new GitExecutable(null, $debugOutput)
 		);
 
+		$repository->setSshConfig(
+			str_rot13(file_get_contents(__DIR__.'/../Fixtures/ssh.key') ?: ''),
+			file_get_contents(__DIR__.'/../Fixtures/known_hosts'),
+		);
+
 		$this->assertInstanceOf(
 			File::class,
 			$file = $repository
@@ -145,16 +150,20 @@ class RepositoryTest extends TestCase
 
 		try {
 			$repository->connect();
-			$this->fail();
+			$this->fail('Should have thrown an exception with: invalid format');
 		} catch (ConnectionException $exception) {
 			$this->assertStringContainsString('invalid format', (string) $exception);
 		}
 
-		$repository->setSshConfig(null, 'malformed known hosts');
+		$repository->setSshConfig(
+			null,
+			'github.com ssh-rsa AAAA',
+			'ssh -o GlobalKnownHostsFile=/dev/null', // Disable known hosts on CI
+		);
 
 		try {
 			$repository->connect();
-			$this->fail();
+			$this->fail('Should have thrown an exception with: Host key verification failed');
 		} catch (ConnectionException $exception) {
 			$this->assertStringContainsString('Host key verification failed', (string) $exception);
 		}
@@ -163,12 +172,15 @@ class RepositoryTest extends TestCase
 
 		try {
 			$repository->connect();
-			$this->fail();
+			$this->fail('Should have thrown an exception with: error from command');
 		} catch (ConnectionException $exception) {
 			$this->assertStringContainsString('error from command', (string) $exception);
 		}
 
-		$this->assertGreaterThan(0, \count($repository->setSshConfig()->connect()->listBranches()));
+		unset($repository, $exception);
+		gc_collect_cycles();
+
+		$this->assertSame(0, $this->getTmpDirSize());
 	}
 
 	private function getTmpDirSize(): int
