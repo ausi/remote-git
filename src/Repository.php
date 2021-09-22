@@ -57,6 +57,11 @@ class Repository
 
 	public function __destruct()
 	{
+		// Fix read only files on Windows systems
+		if ('\\' === \DIRECTORY_SEPARATOR && file_exists($this->gitDir)) {
+			(new Filesystem)->chmod($this->gitDir, 0755, 0000, true);
+		}
+
 		(new Filesystem)->remove($this->gitDir);
 	}
 

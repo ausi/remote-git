@@ -146,7 +146,7 @@ class RepositoryTest extends TestCase
 
 		$repository = new Repository($repoUrl, $this->tmpDir, $executable);
 
-		$repository->setSshConfig('malformed private key');
+		$repository->setSshConfig('malformed private key', false);
 
 		try {
 			$repository->connect();
@@ -185,6 +185,8 @@ class RepositoryTest extends TestCase
 
 	private function getTmpDirSize(): int
 	{
+		clearstatcache();
+
 		$size = 0;
 		$files = new \RecursiveIteratorIterator(
 			new \RecursiveDirectoryIterator($this->tmpDir, \FilesystemIterator::SKIP_DOTS)
