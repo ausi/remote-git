@@ -257,9 +257,16 @@ class Repository
 			$sshCommand .= ' -i '.escapeshellarg($privateKeyPath);
 		}
 
-		$sshCommand .= ' -o '.escapeshellarg('StrictHostKeyChecking='.($knownHostsPath === false ? 'no' : 'yes'));
+		// Disable host key checking
+		if ($knownHostsPath === false) {
+			$sshCommand .= ' -o CheckHostIP=no';
+			$sshCommand .= ' -o StrictHostKeyChecking=no';
+		}
 
+		// Custom known hosts file
 		if (\is_string($knownHostsPath)) {
+			$sshCommand .= ' -o StrictHostKeyChecking=yes';
+			$sshCommand .= ' -o GlobalKnownHostsFile=/dev/null';
 			$sshCommand .= ' -o '.escapeshellarg('UserKnownHostsFile='.$knownHostsPath);
 		}
 
