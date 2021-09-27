@@ -17,6 +17,7 @@ use Ausi\RemoteGit\Exception\BranchNotFoundException;
 use Ausi\RemoteGit\Exception\ConnectionException;
 use Ausi\RemoteGit\Exception\InitializeException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
+use Ausi\RemoteGit\Exception\InvalidRemoteUrlException;
 use Ausi\RemoteGit\Exception\ProcessFailedException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
@@ -52,6 +53,7 @@ class Repository
 		$this->executable = $gitExecutablePath;
 		$this->gitDir = $this->createTempPath($tempDirectory);
 
+		$this->assertValidUrl($url);
 		$this->initialize($url);
 	}
 
@@ -279,6 +281,40 @@ class Repository
 		$this->run('config', $key, $value);
 
 		return $this;
+	}
+
+	/**
+	 * @throws InvalidRemoteUrlException
+	 *
+	 * @see <https://git-scm.com/docs/git-push#_git_urls>
+	 */
+	private function assertValidUrl(string $url): void
+	{
+		if (preg_match('([^\x21-\x7E])', $url)) {
+			throw new InvalidRemoteUrlException('Remote URL must not contain non-ASCII or whitespace characters');
+		}
+
+		$user = '(?:[^#/?@[\]]+@)?';
+		$host = '[a-z0-9-][a-z0-9.-]*[a-z0-9-]';
+		$port = '(?::\d+)?';
+		$path = '[^/]';
+
+		// GIT, HTTP and FTP protocols
+		if (preg_match("(^(?:git|https?|ftps?)://$host$port/$path)i", $url) === 1) {
+			return;
+		}
+
+		// SSH protocol
+		if (preg_match("(^ssh://$user$host$port/$path)i", $url) === 1) {
+			return;
+		}
+
+		// SSH protocol alternative scp-like syntax
+		if (preg_match("(^$user$host:$path)i", $url) === 1) {
+			return;
+		}
+
+		throw new InvalidRemoteUrlException('Invalid remote URL');
 	}
 
 	/**
