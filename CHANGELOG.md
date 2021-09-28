@@ -4,7 +4,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-* Validate remote URL. [#15]
+ * Validate remote URL. [#15]
+ * Fix host key check. [#13]
 
 ## [0.2.0] (2021-09-22)
 
@@ -20,4 +21,5 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 [0.1.0]: https://github.com/ausi/remote-git/commits/0.1.0
 
 [#15]: https://github.com/ausi/remote-git/issues/15
+[#13]: https://github.com/ausi/remote-git/issues/13
 [#11]: https://github.com/ausi/remote-git/issues/11
