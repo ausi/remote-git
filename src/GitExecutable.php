@@ -16,8 +16,10 @@ namespace Ausi\RemoteGit;
 use Ausi\RemoteGit\Exception\ExecutableNotFoundException;
 use Ausi\RemoteGit\Exception\InvalidGitVersionException;
 use Ausi\RemoteGit\Exception\ProcessFailedException;
+use Ausi\RemoteGit\Exception\ProcessTimedOutException;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException as SymfonyProcessFailedException;
+use Symfony\Component\Process\Exception\ProcessTimedOutException as SymfonyProcessTimedOutException;
 use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
 
@@ -83,6 +85,8 @@ class GitExecutable
 			)->getOutput();
 		} catch (SymfonyProcessFailedException $exception) {
 			throw new ProcessFailedException($exception);
+		} catch (SymfonyProcessTimedOutException $exception) {
+			throw new ProcessTimedOutException($exception);
 		}
 
 		if ($this->debugOutput && ($duration = microtime(true) - $process->getStartTime()) > 0.05) {
