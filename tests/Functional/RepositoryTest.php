@@ -14,13 +14,14 @@ declare(strict_types=1);
 namespace Ausi\RemoteGit\Tests\Functional;
 
 use Ausi\RemoteGit\Exception\ConnectionException;
+use Ausi\RemoteGit\Exception\ProcessFailedException;
+use Ausi\RemoteGit\Exception\ProcessTimedOutException;
 use Ausi\RemoteGit\GitExecutable;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\Repository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\StreamOutput;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class RepositoryTest extends TestCase
 {
@@ -55,7 +56,7 @@ class RepositoryTest extends TestCase
 	{
 		$debugOutput = null;
 
-		if (\in_array('--debug', $_SERVER['argv'], true)) {
+		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
 			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
 			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
 		}
@@ -106,7 +107,7 @@ class RepositoryTest extends TestCase
 		try {
 			$commit->push('HEAD');
 			$this->fail('Pushing should have failed without write access');
-		} catch (ProcessFailedException) {
+		} catch (ProcessFailedException|ProcessTimedOutException) {
 			$debugOutput?->writeln('<fg=green>Failed as expected because of missing write access</>');
 		}
 
@@ -136,7 +137,7 @@ class RepositoryTest extends TestCase
 	{
 		$debugOutput = null;
 
-		if (\in_array('--debug', $_SERVER['argv'], true)) {
+		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
 			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
 			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
 		}

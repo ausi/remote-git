@@ -12,8 +12,8 @@
     ],
     "require": {
         "php": "^8.0",
-        "symfony/filesystem": "^5.3",
-        "symfony/process": "^5.3"
+        "symfony/filesystem": "^5.3 || ^6.0",
+        "symfony/process": "^5.3 || ^6.0"
     },
     "require-dev": {
         "contao/easy-coding-standard": "^3.3",
@@ -53,5 +53,10 @@
         "unit-tests": [
             "vendor/bin/phpunit --colors=always"
         ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
