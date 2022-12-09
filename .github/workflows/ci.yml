@@ -91,7 +91,7 @@ jobs:
         run: vendor/bin/phpunit --testsuite=unit --colors=always
 
       - name: Run the functional tests
-        run: vendor/bin/phpunit --testsuite=functional --colors=always --debug
+        run: vendor/bin/phpunit --testsuite=functional --colors=always
 
   prefer-lowest:
     name: Prefer Lowest
