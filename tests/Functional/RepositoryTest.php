@@ -151,9 +151,12 @@ class RepositoryTest extends TestCase
 
 		try {
 			$repository->connect();
-			$this->fail('Should have thrown an exception with: invalid format');
+			$this->fail('Should have thrown an exception with: invalid format or error in libcrypto');
 		} catch (ConnectionException $exception) {
-			$this->assertStringContainsString('invalid format', (string) $exception);
+			$this->assertTrue(
+				str_contains((string) $exception, 'error in libcrypto')
+				|| str_contains((string) $exception, 'invalid format')
+			);
 		}
 
 		$repository->setSshConfig(
