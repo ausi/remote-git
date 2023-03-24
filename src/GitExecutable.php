@@ -35,10 +35,10 @@ class GitExecutable
 	{
 		if ($path === null) {
 			$path = (new ExecutableFinder)->find('git', '/usr/bin/git');
+		}
 
-			if ($path === null) {
-				throw new ExecutableNotFoundException();
-			}
+		if ($path === null || $path === '') {
+			throw new ExecutableNotFoundException();
 		}
 
 		$this->path = $path;
