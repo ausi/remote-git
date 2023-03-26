@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+ * Ensure an empty executable path is not accepted [#20]
 
 ## [0.2.2] (2022-12-09)
 
@@ -29,6 +30,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 [0.2.0]: https://github.com/ausi/remote-git/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/ausi/remote-git/commits/0.1.0
 
+[#20]: https://github.com/ausi/remote-git/issues/20
 [#17]: https://github.com/ausi/remote-git/issues/17
 [#15]: https://github.com/ausi/remote-git/issues/15
 [#13]: https://github.com/ausi/remote-git/issues/13
