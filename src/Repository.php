@@ -219,6 +219,7 @@ class Repository
 
 		$this->run(
 			'push origin --progress',
+			'--no-thin', // Disable git packed objects as we do not have a local copy (https://git-scm.com/docs/git-pack-objects)
 			'--'.($force ? '' : 'no-').'force-with-lease',
 			$commit->getHash().':refs/heads/'.$branchName
 		);
