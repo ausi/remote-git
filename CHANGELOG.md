@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+
+## [0.2.3] (2023-03-26)
+
  * Ensure an empty executable path is not accepted. [#20]
  * Disable git packed objects. [#21]
 
@@ -25,7 +28,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
  * Initial release
 
-[Unreleased]: https://github.com/ausi/remote-git/compare/0.2.2...HEAD
+[Unreleased]: https://github.com/ausi/remote-git/compare/0.2.3...HEAD
+[0.2.3]: https://github.com/ausi/remote-git/compare/0.2.2...0.2.3
 [0.2.2]: https://github.com/ausi/remote-git/compare/0.2.1...0.2.2
 [0.2.1]: https://github.com/ausi/remote-git/compare/0.2.0...0.2.1
 [0.2.0]: https://github.com/ausi/remote-git/compare/0.1.0...0.2.0
