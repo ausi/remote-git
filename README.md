@@ -1,7 +1,7 @@
 Remote Git Library for PHP
 ==========================
 
-[![Build Status](https://img.shields.io/github/workflow/status/ausi/remote-git/CI/main.svg?style=flat-square)](https://github.com/ausi/remote-git/actions?query=branch%3Amain)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ausi/remote-git/ci.yml?branch=main&style=flat-square)](https://github.com/contao/imagine-svg/actions?query=branch%3A1.x)
 [![Coverage](https://img.shields.io/codecov/c/github/ausi/remote-git/main.svg?style=flat-square)](https://codecov.io/gh/ausi/remote-git)
 [![Packagist Version](https://img.shields.io/packagist/v/ausi/remote-git.svg?style=flat-square)](https://packagist.org/packages/ausi/remote-git)
 [![Downloads](https://img.shields.io/packagist/dt/ausi/remote-git.svg?style=flat-square)](https://packagist.org/packages/ausi/remote-git)
