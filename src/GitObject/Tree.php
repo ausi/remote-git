@@ -134,16 +134,48 @@ final class Tree extends GitObject
 		}
 
 		$treeByPath['/'.$path] = [$file->getHash(), $mode];
-
-		ksort($treeByPath);
-
 		$treeContent = '';
 
-		foreach ($treeByPath as $itemPath => $item) {
+		foreach ($this->sortTree($treeByPath) as $itemPath => $item) {
 			$treeContent .= $item[1].' '.substr($itemPath, 1)."\0".hex2bin($item[0]);
 		}
 
 		return $this->getRepo()->createObject($treeContent, self::class);
+	}
+
+	/**
+	 * The entries in a tree are ordered in the _path_ order,
+	 * which means that a directory entry is ordered
+	 * by adding a slash to the end of it.
+	 *
+	 * So a directory called "a" is ordered
+	 * _after_ a file called "a.c",
+	 * because "a/" sorts after "a.c".
+	 *
+	 * @see https://github.com/git/git/blob/5e238546dc7a232d8998f1cd1ec9d3f4a0add68b/fsck.c#L478-L485
+	 */
+	private function sortTree(array $treeByPath): array
+	{
+		$suffixed = [];
+
+		foreach ($treeByPath as $path => $item) {
+			if ((int) substr($item[1], -6, -4) === 4) {
+				$path .= '/';
+			}
+			$suffixed[$path] = $item;
+		}
+
+		ksort($suffixed);
+		$treeByPath = [];
+
+		foreach ($suffixed as $path => $item) {
+			if ((int) substr($item[1], -6, -4) === 4) {
+				$path = substr($path, 0, -1);
+			}
+			$treeByPath[$path] = $item;
+		}
+
+		return $treeByPath;
 	}
 
 	private function loadTreeContent(): string

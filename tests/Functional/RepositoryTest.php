@@ -18,6 +18,7 @@ use Ausi\RemoteGit\Exception\ProcessFailedException;
 use Ausi\RemoteGit\Exception\ProcessTimedOutException;
 use Ausi\RemoteGit\GitExecutable;
 use Ausi\RemoteGit\GitObject\File;
+use Ausi\RemoteGit\GitObject\Tree;
 use Ausi\RemoteGit\Repository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\StreamOutput;
@@ -182,6 +183,60 @@ class RepositoryTest extends TestCase
 		}
 
 		unset($repository, $exception);
+		gc_collect_cycles();
+
+		$this->assertSame(0, $this->getTmpDirSize());
+	}
+
+	public function testCorrectTreeSorting(): void
+	{
+		$debugOutput = null;
+
+		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
+			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
+			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
+		}
+
+		$repoUrl = iterator_to_array($this->repoUrlsProvider())[1][0];
+		$executable = new GitExecutable(null, $debugOutput);
+
+		$repository = new Repository($repoUrl, $this->tmpDir, $executable);
+		$gitDir = (new \ReflectionClass($repository))->getProperty('gitDir')->getValue($repository);
+
+		$tree = (new Tree($repository, '4b825dc642cb6eb9a060e54bf8d69288fbee4904'))
+			->withFile('foo.bar', '')
+			->withFile('foo/bar', '')
+			->withFile('bar.baz', '')
+			->withFile('bar', '')
+			->withFile('2', '')
+			->withFile('10', '')
+			->withFile('a', '')
+			->withFile('A', '')
+		;
+
+		$this->assertSame(
+			implode(
+				"\n",
+				[
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\t10",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\t2",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\tA",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\ta",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\tbar",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\tbar.baz",
+					"100644 blob e69de29bb2d1d6434b8b29ae775ad8c2e48c5391\tfoo.bar",
+					"040000 tree d87cbcba0e2ede0752bdafc5938da35546803ba5\tfoo",
+					'',
+				],
+			),
+			$executable->execute(['ls-tree', $tree->getHash()], $gitDir),
+			'Directory "foo" should be sorted after "foo.bar"',
+		);
+
+		// Validate tree
+		$executable->execute(['fsck'], $gitDir);
+
+		unset($repository, $tree);
 		gc_collect_cycles();
 
 		$this->assertSame(0, $this->getTmpDirSize());
