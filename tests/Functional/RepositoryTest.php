@@ -34,7 +34,7 @@ class RepositoryTest extends TestCase
 
 		$this->tmpDir = __DIR__.'/tmp';
 
-		if (file_exists($this->tmpDir)) {
+		if ((new Filesystem)->exists($this->tmpDir)) {
 			(new Filesystem)->remove($this->tmpDir);
 		}
 
@@ -43,7 +43,7 @@ class RepositoryTest extends TestCase
 
 	protected function tearDown(): void
 	{
-		if (file_exists($this->tmpDir)) {
+		if ((new Filesystem)->exists($this->tmpDir)) {
 			(new Filesystem)->remove($this->tmpDir);
 		}
 
@@ -58,7 +58,7 @@ class RepositoryTest extends TestCase
 		$debugOutput = null;
 
 		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
-			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
+			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException);
 			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
 		}
 
@@ -82,7 +82,6 @@ class RepositoryTest extends TestCase
 				->getFile('.gitignore')
 		);
 
-		/** @var File $file */
 		$this->assertNotEmpty($file->getContents());
 
 		$tree = $repository
@@ -102,7 +101,6 @@ class RepositoryTest extends TestCase
 
 		$this->assertInstanceOf(File::class, $file = $commit->getTree()->getFile('non/existent/directory/file.txt'));
 
-		/** @var File $file */
 		$this->assertSame("🎉\n", $file->getContents());
 
 		try {
@@ -123,7 +121,7 @@ class RepositoryTest extends TestCase
 	}
 
 	/**
-	 * @return \Generator<array>
+	 * @return \Generator<array{0:string}>
 	 */
 	public function repoUrlsProvider(): \Generator
 	{
@@ -139,7 +137,7 @@ class RepositoryTest extends TestCase
 		$debugOutput = null;
 
 		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
-			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
+			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException);
 			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
 		}
 

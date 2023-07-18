@@ -16,14 +16,15 @@
         "symfony/process": "^5.3 || ^6.0"
     },
     "require-dev": {
-        "contao/easy-coding-standard": "^3.3",
-        "phpstan/phpstan": "^0.12.96",
-        "phpstan/phpstan-phpunit": "^0.12.22",
+        "contao/easy-coding-standard": "^6.3.1",
+        "phpstan/phpstan": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "phpstan/phpstan-symfony": "^1.0",
         "phpunit/phpunit": "^9.5.8",
-        "psalm/plugin-phpunit": "^0.16",
-        "slam/phpstan-extensions": "^5.1",
+        "psalm/plugin-phpunit": "^0.18",
+        "slam/phpstan-extensions": "^6.0",
         "symfony/console": "^5.3 || ^6.0",
-        "vimeo/psalm": "^4.9"
+        "vimeo/psalm": "^5.13"
     },
     "autoload": {
         "psr-4": {
@@ -43,10 +44,10 @@
             "@psalm"
         ],
         "cs-fixer": [
-            "vendor/bin/ecs check src tests --fix --ansi"
+            "vendor/bin/ecs check src tests ecs.php --fix --ansi"
         ],
         "phpstan": [
-            "vendor/bin/phpstan analyze src tests --level=8 --memory-limit=1G --ansi"
+            "vendor/bin/phpstan analyze src tests --memory-limit=1G --ansi"
         ],
         "psalm": [
             "vendor/bin/psalm --no-suggestions"
