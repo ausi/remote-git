@@ -17,8 +17,11 @@ use Ausi\RemoteGit\GitObject\Commit;
 
 class Branch
 {
-	public function __construct(private Repository $repo, private string $name, private string $commitHash)
-	{
+	public function __construct(
+		private Repository $repo,
+		private string $name,
+		private string $commitHash,
+	) {
 	}
 
 	public function getName(): string

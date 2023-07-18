@@ -94,7 +94,7 @@ class RepositoryTest extends TestCase
 	}
 
 	/**
-	 * @return \Generator<array>
+	 * @return \Generator<array{0:string}>
 	 */
 	public function validRemoteUrls(): \Generator
 	{
@@ -122,7 +122,7 @@ class RepositoryTest extends TestCase
 	}
 
 	/**
-	 * @return \Generator<array>
+	 * @return \Generator<array{0:string}>
 	 */
 	public function invalidRemoteUrls(): \Generator
 	{

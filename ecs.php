@@ -2,38 +2,41 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the ausi/remote-git package.
+ *
+ * (c) Martin Auswöger <martin@auswoeger.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use PhpCsFixer\Fixer\Comment\HeaderCommentFixer;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\Operator\NewWithBracesFixer;
-use PhpCsFixer\Fixer\PhpUnit\PhpUnitExpectationFixer;
-use SlevomatCodingStandard\Sniffs\Variables\UselessVariableSniff;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symplify\EasyCodingStandard\Config\ECSConfig;
 use Symplify\EasyCodingStandard\ValueObject\Option;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-	$containerConfigurator->import(__DIR__.'/vendor/contao/easy-coding-standard/config/set/contao.php');
+return static function (ECSConfig $ecsConfig): void {
+	$ecsConfig->sets([__DIR__.'/vendor/contao/easy-coding-standard/config/contao.php']);
 
-	$parameters = $containerConfigurator->parameters();
-	$parameters->set(Option::INDENTATION, 'tab');
-
-	$parameters->set(Option::SKIP, [
-		NewWithBracesFixer::class => null,
-		UselessVariableSniff::class => null,
-		PhpUnitExpectationFixer::class => null,
+	$ecsConfig->ruleWithConfiguration(NewWithBracesFixer::class, [
+		'named_class' => false,
+		'anonymous_class' => false,
 	]);
 
-	$services = $containerConfigurator->services();
-	$services
-		->set(HeaderCommentFixer::class)
-		->call('configure', [[
-			'header' => "This file is part of the ausi/remote-git package.\n\n(c) Martin Auswöger <martin@auswoeger.com>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",
-		]]);
+	$ecsConfig->ruleWithConfiguration(HeaderCommentFixer::class, [
+		'header' => "This file is part of the ausi/remote-git package.\n\n(c) Martin Auswöger <martin@auswoeger.com>\n\nFor the full copyright and license information, please view the LICENSE\nfile that was distributed with this source code.",
+	]);
 
-	$services
-		->set(YodaStyleFixer::class)
-		->call('configure', [[
-			'equal' => false,
-			'identical' => false,
-			'less_and_greater' => false,
-		]]);
+	$ecsConfig->ruleWithConfiguration(YodaStyleFixer::class, [
+		'equal' => false,
+		'identical' => false,
+		'less_and_greater' => false,
+	]);
+
+	$ecsConfig->parallel();
+	$ecsConfig->lineEnding("\n");
+	$ecsConfig->indentation(Option::INDENTATION_TAB);
+	$ecsConfig->cacheDirectory(sys_get_temp_dir().'/ecs_default_cache');
 };

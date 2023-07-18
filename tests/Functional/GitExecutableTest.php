@@ -21,7 +21,7 @@ class GitExecutableTest extends TestCase
 {
 	public function testInstantiation(): void
 	{
-		$this->assertInstanceOf(GitExecutable::class, new GitExecutable());
+		$this->assertInstanceOf(GitExecutable::class, new GitExecutable);
 
 		$this->expectException(ProcessFailedException::class);
 

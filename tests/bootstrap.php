@@ -15,6 +15,7 @@ use Composer\Autoload\ClassLoader;
 
 error_reporting(E_ALL);
 
+/** @phpstan-ignore-next-line */
 $include = /** @return ClassLoader|false */ fn (string $file) => file_exists($file) ? include $file : false;
 
 if (
