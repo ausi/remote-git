@@ -199,7 +199,9 @@ class RepositoryTest extends TestCase
 		$executable = new GitExecutable(null, $debugOutput);
 
 		$repository = new Repository($repoUrl, $this->tmpDir, $executable);
-		$gitDir = (new \ReflectionClass($repository))->getProperty('gitDir')->getValue($repository);
+		$gitDirProperty = (new \ReflectionClass($repository))->getProperty('gitDir');
+		$gitDirProperty->setAccessible(true);
+		$gitDir = $gitDirProperty->getValue($repository);
 
 		$tree = (new Tree($repository, '4b825dc642cb6eb9a060e54bf8d69288fbee4904'))
 			->withFile('foo.bar', '')
