@@ -32,7 +32,7 @@ class Repository
 	private GitExecutable $executable;
 	private string $gitDir;
 	private bool $connected = false;
-	private ?string $headBranchName = null;
+	private string|null $headBranchName = null;
 
 	/**
 	 * @var array<Branch>
@@ -44,7 +44,7 @@ class Repository
 	 * @param string|null               $tempDirectory     Directory to store the shallow clone, defaults to sys_get_temp_dir()
 	 * @param string|GitExecutable|null $gitExecutablePath Path to the git binary, defaults to the path found by the ExecutableFinder
 	 */
-	public function __construct(string $url, string $tempDirectory = null, string|GitExecutable $gitExecutablePath = null)
+	public function __construct(string $url, string|null $tempDirectory = null, GitExecutable|string $gitExecutablePath = null)
 	{
 		if (!$gitExecutablePath instanceof GitExecutable) {
 			$gitExecutablePath = new GitExecutable($gitExecutablePath);
@@ -60,7 +60,7 @@ class Repository
 	public function __destruct()
 	{
 		// Fix read only files on Windows systems
-		if ('\\' === \DIRECTORY_SEPARATOR && file_exists($this->gitDir)) {
+		if ('\\' === \DIRECTORY_SEPARATOR && (new Filesystem)->exists($this->gitDir)) {
 			(new Filesystem)->chmod($this->gitDir, 0755, 0000, true);
 		}
 
@@ -88,9 +88,9 @@ class Repository
 	}
 
 	/**
-	 * @throws RuntimeException
-	 *
 	 * @return array<Branch>
+	 *
+	 * @throws RuntimeException
 	 */
 	public function listBranches(): array
 	{
@@ -129,7 +129,7 @@ class Repository
 
 		$key = 'refs/remotes/origin/'.$name;
 
-		return $this->branches[$key] ?? throw new BranchNotFoundException();
+		return $this->branches[$key] ?? throw new BranchNotFoundException;
 	}
 
 	/**
@@ -181,9 +181,9 @@ class Repository
 	 *
 	 * @param class-string<T> $type
 	 *
-	 * @throws InvalidGitObjectException
-	 *
 	 * @return T
+	 *
+	 * @throws InvalidGitObjectException
 	 */
 	public function createObject(string $contents, string $type = File::class): GitObjectInterface
 	{
@@ -231,19 +231,19 @@ class Repository
 	 * @param string|null $privateKey Identity key to use for the SSH connection or null to use the default of the system
 	 * @param string|bool $knownHosts Known hosts to verify against, false disables the host key checking
 	 */
-	public function setSshConfig(string $privateKey = null, string|bool $knownHosts = true, string $sshCommand = 'ssh'): static
+	public function setSshConfig(string|null $privateKey = null, bool|string $knownHosts = true, string $sshCommand = 'ssh'): static
 	{
 		$keyPath = $this->gitDir.'/.ssh_identity';
 		$hostsPath = $this->gitDir.'/.ssh_known_hosts';
 
 		if (\is_string($privateKey)) {
-			file_put_contents($keyPath, $privateKey);
-			chmod($keyPath, 0600);
+			(new Filesystem)->dumpFile($keyPath, $privateKey);
+			(new Filesystem)->chmod($keyPath, 0600);
 			$privateKey = $keyPath;
 		}
 
 		if (\is_string($knownHosts)) {
-			file_put_contents($hostsPath, $knownHosts);
+			(new Filesystem)->dumpFile($hostsPath, $knownHosts);
 			$knownHosts = $hostsPath;
 		}
 
@@ -254,7 +254,7 @@ class Repository
 	 * @param string|null $privateKeyPath Identity file to use for the SSH connection or null to use the default of the system
 	 * @param string|bool $knownHostsPath Known hosts file to verify against, false disables the host key checking
 	 */
-	public function setSshConfigPaths(string $privateKeyPath = null, string|bool $knownHostsPath = true, string $sshCommand = 'ssh'): static
+	public function setSshConfigPaths(string|null $privateKeyPath = null, bool|string $knownHostsPath = true, string $sshCommand = 'ssh'): static
 	{
 		if ($privateKeyPath !== null) {
 			$sshCommand .= ' -i '.escapeshellarg($privateKeyPath);
@@ -350,7 +350,7 @@ class Repository
 		return $this->executable->execute([...explode(' ', $command), ...array_values($args)], $this->gitDir, $input);
 	}
 
-	private function createTempPath(?string $dir): string
+	private function createTempPath(string|null $dir): string
 	{
 		/** @psalm-suppress TooManyArguments */
 		$path = (new Filesystem)->tempnam($dir ?? sys_get_temp_dir(), 'repo', '.git');

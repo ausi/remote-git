@@ -59,7 +59,7 @@ jobs:
         run: vendor/bin/ecs check src tests --no-progress-bar --ansi
 
       - name: PHPStan
-        run: vendor/bin/phpstan analyse src tests --level=8 --no-progress
+        run: vendor/bin/phpstan analyse src tests --no-progress
 
       - name: Psalm
         run: vendor/bin/psalm --no-suggestions --threads=4 --no-progress

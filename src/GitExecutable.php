@@ -29,16 +29,16 @@ use Symfony\Component\Process\Process;
 class GitExecutable
 {
 	private string $path;
-	private ?OutputInterface $debugOutput;
+	private OutputInterface|null $debugOutput;
 
-	public function __construct(string $path = null, OutputInterface $debugOutput = null)
+	public function __construct(string|null $path = null, OutputInterface|null $debugOutput = null)
 	{
 		if ($path === null) {
 			$path = (new ExecutableFinder)->find('git', '/usr/bin/git');
 		}
 
 		if ($path === null || $path === '') {
-			throw new ExecutableNotFoundException();
+			throw new ExecutableNotFoundException;
 		}
 
 		$this->path = $path;
@@ -56,12 +56,12 @@ class GitExecutable
 		}
 
 		if (version_compare($versionMatch[0], '2.30.0') < 0) {
-			throw new InvalidGitVersionException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2]));
+			throw new InvalidGitVersionException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2] ?? ''));
 		}
 	}
 
 	/**
-	 * @param array<int,string> $arguments
+	 * @param array<int, string> $arguments
 	 *
 	 * @throws ProcessFailedException
 	 */
@@ -80,6 +80,7 @@ class GitExecutable
 		}
 
 		try {
+			/** @throws SymfonyProcessFailedException|SymfonyProcessTimedOutException */
 			$output = $process->mustRun(
 				fn (string $type, string $data) => $this->debugOutput?->write($type === 'err' ? $data : '', false, OutputInterface::OUTPUT_RAW)
 			)->getOutput();
