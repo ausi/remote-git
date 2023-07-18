@@ -191,7 +191,7 @@ class RepositoryTest extends TestCase
 		$debugOutput = null;
 
 		if (\in_array('--debug', $_SERVER['argv'] ?? [], true)) {
-			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException());
+			$debugOutput = new StreamOutput(fopen('php://stderr', 'w') ?: throw new \RuntimeException);
 			$debugOutput->writeln("\n<fg=yellow>GitExecutable debug output:</>\n");
 		}
 

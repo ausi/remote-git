@@ -153,6 +153,10 @@ final class Tree extends GitObject
 	 * because "a/" sorts after "a.c".
 	 *
 	 * @see https://github.com/git/git/blob/5e238546dc7a232d8998f1cd1ec9d3f4a0add68b/fsck.c#L478-L485
+	 *
+	 * @param array<string, array{string, string}> $treeByPath
+	 *
+	 * @return array<string, array{string, string}>
 	 */
 	private function sortTree(array $treeByPath): array
 	{
