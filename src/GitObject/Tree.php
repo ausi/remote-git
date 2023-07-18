@@ -156,24 +156,15 @@ final class Tree extends GitObject
 	 */
 	private function sortTree(array $treeByPath): array
 	{
-		$suffixed = [];
+		uksort(
+			$treeByPath,
+			static function (string $a, string $b) use ($treeByPath): int {
+				$a .= (int) substr($treeByPath[$a][1], -6, -4) === 4 ? '/' : '';
+				$b .= (int) substr($treeByPath[$b][1], -6, -4) === 4 ? '/' : '';
 
-		foreach ($treeByPath as $path => $item) {
-			if ((int) substr($item[1], -6, -4) === 4) {
-				$path .= '/';
+				return $a <=> $b;
 			}
-			$suffixed[$path] = $item;
-		}
-
-		ksort($suffixed);
-		$treeByPath = [];
-
-		foreach ($suffixed as $path => $item) {
-			if ((int) substr($item[1], -6, -4) === 4) {
-				$path = substr($path, 0, -1);
-			}
-			$treeByPath[$path] = $item;
-		}
+		);
 
 		return $treeByPath;
 	}
