@@ -23,8 +23,8 @@ class InvalidGitObjectException extends RuntimeException
 			sprintf(
 				'$type must be a class string of type "%s", "%s" given',
 				GitObject::class,
-				$type
-			)
+				$type,
+			),
 		);
 	}
 }
