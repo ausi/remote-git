@@ -33,7 +33,7 @@ class RepositoryTest extends TestCase
 					}
 
 					return '';
-				}
+				},
 			)
 		;
 
@@ -55,7 +55,7 @@ class RepositoryTest extends TestCase
 					}
 
 					return '';
-				}
+				},
 			)
 		;
 
@@ -84,7 +84,7 @@ class RepositoryTest extends TestCase
 					}
 
 					return '';
-				}
+				},
 			)
 		;
 

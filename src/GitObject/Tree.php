@@ -20,6 +20,7 @@ use Ausi\RemoteGit\Exception\InvalidPathException;
 final class Tree extends GitObject
 {
 	private const EMPTY_TREE_HASH = '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+
 	private string|null $treeContent = null;
 
 	public static function getTypeName(): string
@@ -36,7 +37,7 @@ final class Tree extends GitObject
 	 * @throws InvalidGitObjectException
 	 * @throws InvalidPathException
 	 */
-	public function getFile(string $path): File|Tree|null
+	public function getFile(string $path): File|self|null
 	{
 		$pathSegments = explode('/', trim($path, '/'), 2);
 
@@ -83,7 +84,7 @@ final class Tree extends GitObject
 	 * @throws InvalidGitObjectException
 	 * @throws InvalidPathException
 	 */
-	public function withFile(string $path, File|Tree|string $file, bool $executable = false): self
+	public function withFile(string $path, File|self|string $file, bool $executable = false): self
 	{
 		if (!$file instanceof GitObject) {
 			$file = $this->getRepo()->createObject($file);
@@ -167,7 +168,7 @@ final class Tree extends GitObject
 				$b .= (int) substr($treeByPath[$b][1], -6, -4) === 4 ? '/' : '';
 
 				return $a <=> $b;
-			}
+			},
 		);
 
 		return $treeByPath;

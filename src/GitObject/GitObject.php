@@ -18,6 +18,7 @@ use Ausi\RemoteGit\Repository;
 abstract class GitObject implements GitObjectInterface
 {
 	private Repository $repo;
+
 	private string $hash;
 
 	public function __construct(Repository $repo, string $hash)

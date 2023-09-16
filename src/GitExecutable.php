@@ -29,6 +29,7 @@ use Symfony\Component\Process\Process;
 class GitExecutable
 {
 	private string $path;
+
 	private OutputInterface|null $debugOutput;
 
 	public function __construct(string|null $path = null, OutputInterface|null $debugOutput = null)
@@ -82,7 +83,7 @@ class GitExecutable
 		try {
 			/** @throws SymfonyProcessFailedException|SymfonyProcessTimedOutException */
 			$output = $process->mustRun(
-				fn (string $type, string $data) => $this->debugOutput?->write($type === 'err' ? $data : '', false, OutputInterface::OUTPUT_RAW)
+				fn (string $type, string $data) => $this->debugOutput?->write($type === 'err' ? $data : '', false, OutputInterface::OUTPUT_RAW),
 			)->getOutput();
 		} catch (SymfonyProcessFailedException $exception) {
 			throw new ProcessFailedException($exception);

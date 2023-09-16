@@ -30,8 +30,11 @@ use Symfony\Component\Filesystem\Filesystem;
 class Repository
 {
 	private GitExecutable $executable;
+
 	private string $gitDir;
+
 	private bool $connected = false;
+
 	private string|null $headBranchName = null;
 
 	/**
@@ -44,7 +47,7 @@ class Repository
 	 * @param string|null               $tempDirectory     Directory to store the shallow clone, defaults to sys_get_temp_dir()
 	 * @param string|GitExecutable|null $gitExecutablePath Path to the git binary, defaults to the path found by the ExecutableFinder
 	 */
-	public function __construct(string $url, string|null $tempDirectory = null, GitExecutable|string $gitExecutablePath = null)
+	public function __construct(string $url, string|null $tempDirectory = null, GitExecutable|string|null $gitExecutablePath = null)
 	{
 		if (!$gitExecutablePath instanceof GitExecutable) {
 			$gitExecutablePath = new GitExecutable($gitExecutablePath);
@@ -221,7 +224,7 @@ class Repository
 			'push origin --progress',
 			'--no-thin', // Disable git packed objects as we do not have a local copy (https://git-scm.com/docs/git-pack-objects)
 			'--'.($force ? '' : 'no-').'force-with-lease',
-			$commit->getHash().':refs/heads/'.$branchName
+			$commit->getHash().':refs/heads/'.$branchName,
 		);
 
 		return $this;

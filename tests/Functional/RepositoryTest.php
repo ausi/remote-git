@@ -65,7 +65,7 @@ class RepositoryTest extends TestCase
 		$repository = new Repository(
 			$repoUrl,
 			$this->tmpDir,
-			new GitExecutable(null, $debugOutput)
+			new GitExecutable(null, $debugOutput),
 		);
 
 		$repository->setSshConfig(
@@ -79,7 +79,7 @@ class RepositoryTest extends TestCase
 				->getBranch('HEAD')
 				->getCommit()
 				->getTree()
-				->getFile('.gitignore')
+				->getFile('.gitignore'),
 		);
 
 		$this->assertNotEmpty($file->getContents());
@@ -154,7 +154,7 @@ class RepositoryTest extends TestCase
 		} catch (ConnectionException $exception) {
 			$this->assertTrue(
 				str_contains((string) $exception, 'error in libcrypto')
-				|| str_contains((string) $exception, 'invalid format')
+				|| str_contains((string) $exception, 'invalid format'),
 			);
 		}
 
@@ -248,7 +248,7 @@ class RepositoryTest extends TestCase
 
 		$size = 0;
 		$files = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator($this->tmpDir, \FilesystemIterator::SKIP_DOTS)
+			new \RecursiveDirectoryIterator($this->tmpDir, \FilesystemIterator::SKIP_DOTS),
 		);
 
 		foreach ($files as $file) {
