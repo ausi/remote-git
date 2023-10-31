@@ -19,6 +19,7 @@ Usage
 use Ausi\RemoteGit\Repository;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\Exception\ConnectionException;
+use Ausi\RemoteGit\Exception\PushCommitException;
 
 $repo = new Repository('ssh://git@github.com/ausi/remote-git.git');
 
@@ -40,7 +41,11 @@ $newTree = $headCommit
 
 $newCommit = $repo->commitTree($newTree, 'Add example', $headCommit);
 
-$repo->pushCommit($newCommit, 'main');
+try {
+    $repo->pushCommit($newCommit, 'main');
+} catch(PushCommitException $exception) {
+    // Unable to push to the specified remote, e.g. no write access
+}
 ```
 
 Installation
