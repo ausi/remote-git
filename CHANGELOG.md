@@ -4,6 +4,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+ * Throw PushCommitException for failed pushes. [#26]
 
 ## [0.2.4] (2023-07-18)
 
@@ -40,6 +41,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 [0.2.0]: https://github.com/ausi/remote-git/compare/0.1.0...0.2.0
 [0.1.0]: https://github.com/ausi/remote-git/commits/0.1.0
 
+[#26]: https://github.com/ausi/remote-git/issues/26
 [#23]: https://github.com/ausi/remote-git/issues/23
 [#21]: https://github.com/ausi/remote-git/issues/21
 [#20]: https://github.com/ausi/remote-git/issues/20

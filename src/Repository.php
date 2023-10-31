@@ -19,6 +19,7 @@ use Ausi\RemoteGit\Exception\InitializeException;
 use Ausi\RemoteGit\Exception\InvalidGitObjectException;
 use Ausi\RemoteGit\Exception\InvalidRemoteUrlException;
 use Ausi\RemoteGit\Exception\ProcessFailedException;
+use Ausi\RemoteGit\Exception\PushCommitException;
 use Ausi\RemoteGit\Exception\RuntimeException;
 use Ausi\RemoteGit\GitObject\Commit;
 use Ausi\RemoteGit\GitObject\File;
@@ -214,18 +215,32 @@ class Repository
 		return $this->run('cat-file', $type::getTypeName(), $hash);
 	}
 
+	/**
+	 * @throws PushCommitException
+	 */
 	public function pushCommit(Commit $commit, string $branchName, bool $force = false): self
 	{
 		if ($branchName === 'HEAD') {
 			$branchName = $this->getHeadBranchName();
 		}
 
-		$this->run(
-			'push origin --progress',
-			'--no-thin', // Disable git packed objects as we do not have a local copy (https://git-scm.com/docs/git-pack-objects)
-			'--'.($force ? '' : 'no-').'force-with-lease',
-			$commit->getHash().':refs/heads/'.$branchName,
-		);
+		// Throws a ConnectionException if the remote repository is not reachable
+		$this->connect();
+
+		try {
+			$this->run(
+				'push origin --progress',
+				'--no-thin', // Disable git packed objects as we do not have a local copy (https://git-scm.com/docs/git-pack-objects)
+				'--'.($force ? '' : 'no-').'force-with-lease',
+				$commit->getHash().':refs/heads/'.$branchName,
+			);
+		} catch (ProcessFailedException $e) {
+			if ($e->getProcess()->getExitCode() === 128) {
+				throw new PushCommitException('Could not push to remote git repository.', 0, $e);
+			}
+
+			throw $e;
+		}
 
 		return $this;
 	}

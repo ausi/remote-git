@@ -14,8 +14,7 @@ declare(strict_types=1);
 namespace Ausi\RemoteGit\Tests\Functional;
 
 use Ausi\RemoteGit\Exception\ConnectionException;
-use Ausi\RemoteGit\Exception\ProcessFailedException;
-use Ausi\RemoteGit\Exception\ProcessTimedOutException;
+use Ausi\RemoteGit\Exception\PushCommitException;
 use Ausi\RemoteGit\GitExecutable;
 use Ausi\RemoteGit\GitObject\File;
 use Ausi\RemoteGit\GitObject\Tree;
@@ -106,7 +105,7 @@ class RepositoryTest extends TestCase
 		try {
 			$commit->push('HEAD');
 			$this->fail('Pushing should have failed without write access');
-		} catch (ProcessFailedException|ProcessTimedOutException) {
+		} catch (PushCommitException) {
 			$debugOutput?->writeln('<fg=green>Failed as expected because of missing write access</>');
 		}
 
