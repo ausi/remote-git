@@ -68,7 +68,7 @@ class RepositoryTest extends TestCase
 		);
 
 		$repository->setSshConfig(
-			str_rot13(file_get_contents(__DIR__.'/../Fixtures/ssh.key') ?: ''),
+			str_rot13((string) file_get_contents(__DIR__.'/../Fixtures/ssh.key')),
 			file_get_contents(__DIR__.'/../Fixtures/known_hosts'),
 		);
 
