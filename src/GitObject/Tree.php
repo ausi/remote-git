@@ -45,7 +45,7 @@ final class Tree extends GitObject
 			$tree = $this->getFile($pathSegments[0]);
 
 			if ($tree instanceof File) {
-				throw new InvalidPathException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
+				throw new InvalidPathException(\sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
 			}
 
 			return $tree?->getFile($pathSegments[1]);
@@ -62,7 +62,7 @@ final class Tree extends GitObject
 			$nextNull = strpos($treeContent, "\0", $offset);
 
 			if ($nextSpace === false || $nextNull === false || $nextSpace > $nextNull || $nextNull + 20 >= $length) {
-				throw new InvalidGitObjectException(sprintf('Invalid tree object %s.', $this->getHash()));
+				throw new InvalidGitObjectException(\sprintf('Invalid tree object %s.', $this->getHash()));
 			}
 
 			if ($pathSegments[0] === substr($treeContent, $nextSpace + 1, $nextNull - $nextSpace - 1)) {
@@ -91,7 +91,7 @@ final class Tree extends GitObject
 		}
 
 		if ($executable && !$file instanceof File) {
-			throw new InvalidArgumentException(sprintf('Only files can be marked as executable, expected "%s" got "%s"', File::class, $file::class));
+			throw new InvalidArgumentException(\sprintf('Only files can be marked as executable, expected "%s" got "%s"', File::class, $file::class));
 		}
 
 		$pathSegments = explode('/', trim($path, '/'));
@@ -100,7 +100,7 @@ final class Tree extends GitObject
 			$subtree = $this->getFile($pathSegments[0]) ?? new self($this->getRepo(), self::EMPTY_TREE_HASH);
 
 			if ($subtree instanceof File) {
-				throw new InvalidPathException(sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
+				throw new InvalidPathException(\sprintf('Invalid path "%s", "%s" is not a directory', $path, $pathSegments[0]));
 			}
 
 			$path = array_shift($pathSegments);
@@ -119,7 +119,7 @@ final class Tree extends GitObject
 			$nextNull = strpos($treeContent, "\0", $offset);
 
 			if ($nextSpace === false || $nextNull === false || $nextSpace > $nextNull || $nextNull + 20 >= $length) {
-				throw new InvalidGitObjectException(sprintf('Invalid tree object %s.', $this->getHash()));
+				throw new InvalidGitObjectException(\sprintf('Invalid tree object %s.', $this->getHash()));
 			}
 
 			$treeByPath['/'.substr($treeContent, $nextSpace + 1, $nextNull - $nextSpace - 1)] = [

@@ -122,7 +122,7 @@ class RepositoryTest extends TestCase
 	/**
 	 * @return \Generator<array{0:string}>
 	 */
-	public function repoUrlsProvider(): \Generator
+	public static function repoUrlsProvider(): iterable
 	{
 		yield ['https://github.com/torvalds/linux.git'];
 		yield ['ssh://git@github.com/torvalds/linux.git'];

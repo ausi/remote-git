@@ -354,7 +354,7 @@ class Repository
 			$this->setConfig('remote.origin.promisor', 'true');
 			$this->setConfig('remote.origin.partialclonefilter', 'tree:0');
 		} catch (ProcessFailedException $e) {
-			throw new InitializeException(sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
+			throw new InitializeException(\sprintf('Unable to initialize git repository "%s".', $this->gitDir), 0, $e);
 		}
 	}
 

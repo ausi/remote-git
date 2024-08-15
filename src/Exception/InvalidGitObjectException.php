@@ -20,7 +20,7 @@ class InvalidGitObjectException extends RuntimeException
 	public static function createForInvalidType(string $type): self
 	{
 		return new self(
-			sprintf(
+			\sprintf(
 				'$type must be a class string of type "%s", "%s" given',
 				GitObject::class,
 				$type,

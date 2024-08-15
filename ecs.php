@@ -11,6 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+use Contao\EasyCodingStandard\Fixer\CommentLengthFixer;
 use PhpCsFixer\Fixer\Comment\HeaderCommentFixer;
 use PhpCsFixer\Fixer\ControlStructure\YodaStyleFixer;
 use PhpCsFixer\Fixer\Operator\NewWithBracesFixer;
@@ -33,6 +34,10 @@ return static function (ECSConfig $ecsConfig): void {
 		'equal' => false,
 		'identical' => false,
 		'less_and_greater' => false,
+	]);
+
+	$ecsConfig->skip([
+		CommentLengthFixer::class,
 	]);
 
 	$ecsConfig->parallel();

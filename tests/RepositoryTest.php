@@ -96,7 +96,7 @@ class RepositoryTest extends TestCase
 	/**
 	 * @return \Generator<array{0:string}>
 	 */
-	public function validRemoteUrls(): \Generator
+	public static function validRemoteUrls(): iterable
 	{
 		yield ['https://github.com/torvalds/linux.git'];
 		yield ['http://github.com/torvalds/linux.git'];
@@ -124,7 +124,7 @@ class RepositoryTest extends TestCase
 	/**
 	 * @return \Generator<array{0:string}>
 	 */
-	public function invalidRemoteUrls(): \Generator
+	public static function invalidRemoteUrls(): iterable
 	{
 		yield [''];
 		yield ['1'];

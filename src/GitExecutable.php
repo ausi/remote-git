@@ -57,7 +57,7 @@ class GitExecutable
 		}
 
 		if (version_compare($versionMatch[0], '2.30.0') < 0) {
-			throw new InvalidGitVersionException(sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2] ?? ''));
+			throw new InvalidGitVersionException(\sprintf('Git version "%s" is too low, version 2.30.0 or higher is required.', $version[2] ?? ''));
 		}
 	}
 
