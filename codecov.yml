@@ -6,3 +6,6 @@ coverage:
         threshold: 0.2%
 
 comment: false
+
+codecov:
+  token: c6f0480e-8724-48e1-8305-15833aaefef0
