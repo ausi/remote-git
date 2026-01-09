@@ -4,6 +4,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+
+## [0.2.6] (2026-01-09)
+
  * Allow Symfony 7 and 8. [#27]
 
 ## [0.2.5] (2023-10-31)
@@ -37,7 +40,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
  * Initial release
 
-[Unreleased]: https://github.com/ausi/remote-git/compare/0.2.5...HEAD
+[Unreleased]: https://github.com/ausi/remote-git/compare/0.2.6...HEAD
+[0.2.6]: https://github.com/ausi/remote-git/compare/0.2.5...0.2.6
 [0.2.5]: https://github.com/ausi/remote-git/compare/0.2.4...0.2.5
 [0.2.4]: https://github.com/ausi/remote-git/compare/0.2.3...0.2.4
 [0.2.3]: https://github.com/ausi/remote-git/compare/0.2.2...0.2.3
