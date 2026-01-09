@@ -16,15 +16,11 @@
         <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
     </plugins>
     <issueHandlers>
-        <PossiblyInvalidArgument>
+        <ClassMustBeFinal>
             <errorLevel type="suppress">
+                <directory name="src" />
                 <directory name="tests" />
             </errorLevel>
-        </PossiblyInvalidArgument>
-        <MissingConstructor>
-            <errorLevel type="suppress">
-                <directory name="vendor/phpunit/phpunit" />
-            </errorLevel>
-        </MissingConstructor>
+        </ClassMustBeFinal>
     </issueHandlers>
 </psalm>

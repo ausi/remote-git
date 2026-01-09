@@ -15,6 +15,7 @@ namespace Ausi\RemoteGit\GitObject;
 
 class File extends GitObject
 {
+	#[\Override]
 	public static function getTypeName(): string
 	{
 		return 'blob';

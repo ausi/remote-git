@@ -23,6 +23,7 @@ final class Tree extends GitObject
 
 	private string|null $treeContent = null;
 
+	#[\Override]
 	public static function getTypeName(): string
 	{
 		return 'tree';
@@ -138,7 +139,7 @@ final class Tree extends GitObject
 		$treeContent = '';
 
 		foreach ($this->sortTree($treeByPath) as $itemPath => $item) {
-			$treeContent .= $item[1].' '.substr($itemPath, 1)."\0".hex2bin($item[0]);
+			$treeContent .= $item[1].' '.substr($itemPath, 1)."\0".((string) hex2bin($item[0]));
 		}
 
 		return $this->getRepo()->createObject($treeContent, self::class);
