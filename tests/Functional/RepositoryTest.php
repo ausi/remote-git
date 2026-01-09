@@ -27,6 +27,7 @@ class RepositoryTest extends TestCase
 {
 	private string $tmpDir;
 
+	#[\Override]
 	protected function setUp(): void
 	{
 		parent::setUp();
@@ -40,6 +41,7 @@ class RepositoryTest extends TestCase
 		(new Filesystem)->mkdir($this->tmpDir);
 	}
 
+	#[\Override]
 	protected function tearDown(): void
 	{
 		if ((new Filesystem)->exists($this->tmpDir)) {

@@ -27,6 +27,7 @@ abstract class GitObject implements GitObjectInterface
 		$this->hash = $hash;
 	}
 
+	#[\Override]
 	public function getHash(): string
 	{
 		return $this->hash;
